@@ -5,6 +5,7 @@ export interface RSVPFormData {
   presenca: boolean;
   restricoesAlimentares: boolean;
   quaisRestricoes: string;
+  honeypot?: string; // Hidden field for bot detection
 }
 
 export enum FormStep {

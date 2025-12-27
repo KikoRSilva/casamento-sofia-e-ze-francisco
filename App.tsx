@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, ChevronRight, CheckCircle, Mail, User, Info } from 'lucide-react';
 import { FormStep, RSVPFormData } from './types';
@@ -8,6 +8,71 @@ import logo from './logo.png';
 // The URL provided by the user for Google Sheets integration
 const SUBMIT_URL = 'https://script.google.com/macros/s/AKfycbxXD04PFI0elHBzOJNJZqPHhXxFsN973qGSmSNg9CJqr8KUxzSGZ6hNOhhhuhFQh5iu1Q/exec';
 
+// Security constants
+const MIN_FORM_COMPLETION_TIME = 10000; // 10 seconds in milliseconds
+const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5 minutes in milliseconds
+const RATE_LIMIT_STORAGE_KEY = 'rsvp_submissions';
+const MAX_LENGTHS = {
+  nome: 100,
+  email: 255,
+  quaisRestricoes: 500
+};
+
+// Email validation regex
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Input sanitization function to prevent basic XSS
+const sanitizeInput = (input: string): string => {
+  return input
+    .replace(/[<>]/g, '') // Remove angle brackets
+    .trim();
+};
+
+// Rate limiting functions
+const checkRateLimit = (email: string): { allowed: boolean; timeRemaining?: number } => {
+  try {
+    const stored = localStorage.getItem(RATE_LIMIT_STORAGE_KEY);
+    const submissions: Array<{ email: string; timestamp: number }> = stored ? JSON.parse(stored) : [];
+    
+    const now = Date.now();
+    const recentSubmissions = submissions.filter(
+      sub => sub.email.toLowerCase() === email.toLowerCase() && (now - sub.timestamp) < RATE_LIMIT_WINDOW
+    );
+    
+    if (recentSubmissions.length > 0) {
+      const oldestSubmission = recentSubmissions[0];
+      const timeRemaining = RATE_LIMIT_WINDOW - (now - oldestSubmission.timestamp);
+      return { allowed: false, timeRemaining };
+    }
+    
+    return { allowed: true };
+  } catch (error) {
+    // If localStorage fails, allow submission (fail open)
+    console.error('Rate limit check failed:', error);
+    return { allowed: true };
+  }
+};
+
+const recordSubmission = (email: string): void => {
+  try {
+    const stored = localStorage.getItem(RATE_LIMIT_STORAGE_KEY);
+    const submissions: Array<{ email: string; timestamp: number }> = stored ? JSON.parse(stored) : [];
+    
+    const now = Date.now();
+    // Clean up old submissions (older than rate limit window)
+    const recentSubmissions = submissions.filter(
+      sub => (now - sub.timestamp) < RATE_LIMIT_WINDOW
+    );
+    
+    // Add new submission
+    recentSubmissions.push({ email: email.toLowerCase(), timestamp: now });
+    
+    localStorage.setItem(RATE_LIMIT_STORAGE_KEY, JSON.stringify(recentSubmissions));
+  } catch (error) {
+    console.error('Failed to record submission:', error);
+  }
+};
+
 const App: React.FC = () => {
   const [step, setStep] = useState<FormStep>(FormStep.WELCOME);
   const [formData, setFormData] = useState<RSVPFormData>({
@@ -15,35 +80,166 @@ const App: React.FC = () => {
     email: '',
     presenca: true,
     restricoesAlimentares: false,
-    quaisRestricoes: ''
+    quaisRestricoes: '',
+    honeypot: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [emailError, setEmailError] = useState<string>('');
+  const [nomeError, setNomeError] = useState<string>('');
+  const [restricoesError, setRestricoesError] = useState<string>('');
+  const formStartTime = useRef<number | null>(null);
+  
+  // Track form start time when user moves to DETAILS step
+  useEffect(() => {
+    if (step === FormStep.DETAILS && formStartTime.current === null) {
+      formStartTime.current = Date.now();
+    }
+  }, [step]);
+  
+  // Validate nome
+  const validateNome = (nome: string): boolean => {
+    if (!nome.trim()) {
+      setNomeError('Por favor, insere o teu nome completo.');
+      return false;
+    }
+    if (nome.length > MAX_LENGTHS.nome) {
+      setNomeError(`O nome não pode exceder ${MAX_LENGTHS.nome} caracteres.`);
+      return false;
+    }
+    setNomeError('');
+    return true;
+  };
+  
+  // Validate email format
+  const validateEmail = (email: string): boolean => {
+    if (!email.trim()) {
+      setEmailError('Por favor, insere um endereço de email.');
+      return false;
+    }
+    if (!EMAIL_REGEX.test(email)) {
+      setEmailError('Por favor, insere um endereço de email válido.');
+      return false;
+    }
+    if (email.length > MAX_LENGTHS.email) {
+      setEmailError(`O email não pode exceder ${MAX_LENGTHS.email} caracteres.`);
+      return false;
+    }
+    setEmailError('');
+    return true;
+  };
+  
+  // Validate restricoes alimentares
+  const validateRestricoes = (): boolean => {
+    if (formData.restricoesAlimentares && !formData.quaisRestricoes.trim()) {
+      setRestricoesError('Por favor, indica quais são as restrições alimentares.');
+      return false;
+    }
+    if (formData.quaisRestricoes.length > MAX_LENGTHS.quaisRestricoes) {
+      setRestricoesError(`As restrições não podem exceder ${MAX_LENGTHS.quaisRestricoes} caracteres.`);
+      return false;
+    }
+    setRestricoesError('');
+    return true;
+  };
 
   const handleNext = () => {
     if (step === FormStep.WELCOME) setStep(FormStep.DETAILS);
-    else if (step === FormStep.DETAILS) setStep(FormStep.PRESENCE);
+    else if (step === FormStep.DETAILS) {
+      // Validate nome and email before proceeding
+      const nomeValid = validateNome(formData.nome);
+      const emailValid = validateEmail(formData.email);
+      if (nomeValid && emailValid) {
+        setStep(FormStep.PRESENCE);
+      }
+    }
     else if (step === FormStep.PRESENCE) {
       if (formData.presenca) setStep(FormStep.DIET);
       else handleSubmit();
     }
-    else if (step === FormStep.DIET) handleSubmit();
+    else if (step === FormStep.DIET) {
+      // Validate restricoes if needed before submitting
+      if (validateRestricoes()) {
+        handleSubmit();
+      }
+    }
+  };
+
+  const validateInputs = (): { valid: boolean; error?: string } => {
+    // Validate email format
+    if (!EMAIL_REGEX.test(formData.email)) {
+      return { valid: false, error: 'Por favor, insere um endereço de email válido.' };
+    }
+    
+    // Validate length limits
+    if (formData.nome.length > MAX_LENGTHS.nome) {
+      return { valid: false, error: `O nome não pode exceder ${MAX_LENGTHS.nome} caracteres.` };
+    }
+    
+    if (formData.email.length > MAX_LENGTHS.email) {
+      return { valid: false, error: `O email não pode exceder ${MAX_LENGTHS.email} caracteres.` };
+    }
+    
+    if (formData.quaisRestricoes.length > MAX_LENGTHS.quaisRestricoes) {
+      return { valid: false, error: `As restrições alimentares não podem exceder ${MAX_LENGTHS.quaisRestricoes} caracteres.` };
+    }
+    
+    return { valid: true };
   };
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
+    
+    // Security check 1: Honeypot field must be empty
+    if (formData.honeypot && formData.honeypot.trim() !== '') {
+      // Silently reject - this is a bot
+      console.warn('Bot detected: honeypot field filled');
+      return;
+    }
+    
+    // Security check 2: Rate limiting
+    const rateLimitCheck = checkRateLimit(formData.email);
+    if (!rateLimitCheck.allowed) {
+      const minutesRemaining = Math.ceil((rateLimitCheck.timeRemaining || 0) / 60000);
+      alert(`Por favor, aguarda ${minutesRemaining} minuto(s) antes de submeter novamente.`);
+      setIsSubmitting(false);
+      return;
+    }
+    
+    // Security check 3: Minimum form completion time
+    if (formStartTime.current) {
+      const timeSpent = Date.now() - formStartTime.current;
+      if (timeSpent < MIN_FORM_COMPLETION_TIME) {
+        // Silently reject - form completed too quickly (likely automated)
+        console.warn('Bot detected: form completed too quickly');
+        return;
+      }
+    }
+    
+    // Security check 4: Input validation
+    const validation = validateInputs();
+    if (!validation.valid) {
+      alert(validation.error || 'Por favor, verifica os dados inseridos.');
+      setIsSubmitting(false);
+      return;
+    }
+    
     setIsSubmitting(true);
 
     try {
+      // Sanitize inputs before submission
+      const sanitizedNome = sanitizeInput(formData.nome);
+      const sanitizedEmail = sanitizeInput(formData.email);
+      const sanitizedRestricoes = sanitizeInput(formData.quaisRestricoes);
+      
       // Prepare the data as URLSearchParams for compatibility with simple Google Apps Script setups
       const params = new URLSearchParams();
-      params.append('Nome Completo', formData.nome);
-      params.append('Email', formData.email);
+      params.append('Nome Completo', sanitizedNome);
+      params.append('Email', sanitizedEmail);
       params.append('Presença', formData.presenca ? 'Sim' : 'Não');
       params.append('Restrições Alimentares', formData.restricoesAlimentares ? 'Sim' : 'Não');
-      params.append('Quais?', formData.quaisRestricoes || 'N/A');
+      params.append('Quais?', sanitizedRestricoes || 'N/A');
       params.append('Data de Submissão', new Date().toLocaleString('pt-PT'));
       params.append('token', 'rsvp_2026_sofia_ze_francisco');
-
 
       // We use no-cors because Google Apps Script often doesn't handle CORS preflight (OPTIONS)
       // unless specifically configured. Standard form POSTs work best.
@@ -56,6 +252,20 @@ const App: React.FC = () => {
         body: params.toString(),
       });
 
+      // Record successful submission for rate limiting
+      recordSubmission(formData.email);
+      
+      // Clear form data to prevent accidental resubmission
+      setFormData({
+        nome: '',
+        email: '',
+        presenca: true,
+        restricoesAlimentares: false,
+        quaisRestricoes: '',
+        honeypot: ''
+      });
+      formStartTime.current = null;
+
       // In no-cors mode, we can't read the response, but if it doesn't throw, the request was sent.
       setStep(FormStep.THANK_YOU);
     } catch (error) {
@@ -67,7 +277,20 @@ const App: React.FC = () => {
   };
 
   const updateFormData = (updates: Partial<RSVPFormData>) => {
-    setFormData(prev => ({ ...prev, ...updates }));
+    setFormData(prev => {
+      const newData = { ...prev, ...updates };
+      // Apply length limits
+      if (newData.nome && newData.nome.length > MAX_LENGTHS.nome) {
+        newData.nome = newData.nome.substring(0, MAX_LENGTHS.nome);
+      }
+      if (newData.email && newData.email.length > MAX_LENGTHS.email) {
+        newData.email = newData.email.substring(0, MAX_LENGTHS.email);
+      }
+      if (newData.quaisRestricoes && newData.quaisRestricoes.length > MAX_LENGTHS.quaisRestricoes) {
+        newData.quaisRestricoes = newData.quaisRestricoes.substring(0, MAX_LENGTHS.quaisRestricoes);
+      }
+      return newData;
+    });
   };
 
   return (
@@ -142,10 +365,20 @@ const App: React.FC = () => {
                     <input 
                       type="text"
                       value={formData.nome}
-                      onChange={(e) => updateFormData({ nome: e.target.value })}
+                      onChange={(e) => {
+                        updateFormData({ nome: e.target.value });
+                        // Clear error when user starts typing
+                        if (nomeError) setNomeError('');
+                      }}
                       placeholder="Como queres aparecer na lista?"
-                      className="w-full bg-transparent border-b border-stone-200 py-3 px-1 focus:border-[#5D8AA8] outline-none transition-colors"
+                      maxLength={MAX_LENGTHS.nome}
+                      className={`w-full bg-transparent border-b py-3 px-1 focus:border-[#5D8AA8] outline-none transition-colors ${
+                        nomeError ? 'border-red-300' : 'border-stone-200'
+                      }`}
                     />
+                    {nomeError && (
+                      <p className="text-red-500 text-xs mt-1 ml-1">{nomeError}</p>
+                    )}
                   </div>
 
                   <div className="relative">
@@ -153,11 +386,40 @@ const App: React.FC = () => {
                     <input 
                       type="email"
                       value={formData.email}
-                      onChange={(e) => updateFormData({ email: e.target.value })}
+                      onChange={(e) => {
+                        updateFormData({ email: e.target.value });
+                        // Clear error when user starts typing
+                        if (emailError) setEmailError('');
+                      }}
                       placeholder="Para te enviarmos novidades"
-                      className="w-full bg-transparent border-b border-stone-200 py-3 px-1 focus:border-[#5D8AA8] outline-none transition-colors"
+                      maxLength={MAX_LENGTHS.email}
+                      className={`w-full bg-transparent border-b py-3 px-1 focus:border-[#5D8AA8] outline-none transition-colors ${
+                        emailError ? 'border-red-300' : 'border-stone-200'
+                      }`}
                     />
+                    {emailError && (
+                      <p className="text-red-500 text-xs mt-1 ml-1">{emailError}</p>
+                    )}
                   </div>
+                  
+                  {/* Honeypot field - hidden from users, visible to bots */}
+                  <input
+                    type="text"
+                    name="website"
+                    value={formData.honeypot || ''}
+                    onChange={(e) => updateFormData({ honeypot: e.target.value })}
+                    tabIndex={-1}
+                    autoComplete="off"
+                    style={{
+                      position: 'absolute',
+                      left: '-9999px',
+                      opacity: 0,
+                      pointerEvents: 'none',
+                      width: '1px',
+                      height: '1px'
+                    }}
+                    aria-hidden="true"
+                  />
                 </div>
 
                 <button 
@@ -278,18 +540,28 @@ const App: React.FC = () => {
                     <label className="block text-xs md:text-xs uppercase tracking-widest text-stone-400 mb-1 ml-1">Quais?</label>
                     <textarea 
                       value={formData.quaisRestricoes}
-                      onChange={(e) => updateFormData({ quaisRestricoes: e.target.value })}
+                      onChange={(e) => {
+                        updateFormData({ quaisRestricoes: e.target.value });
+                        // Clear error when user starts typing
+                        if (restricoesError) setRestricoesError('');
+                      }}
                       rows={3}
-                      className="w-full bg-stone-50 rounded-xl p-4 border border-stone-100 focus:border-[#5D8AA8] outline-none transition-colors text-sm md:rows-4"
+                      maxLength={MAX_LENGTHS.quaisRestricoes}
+                      className={`w-full bg-stone-50 rounded-xl p-4 border focus:border-[#5D8AA8] outline-none transition-colors text-sm md:rows-4 ${
+                        restricoesError ? 'border-red-300' : 'border-stone-100'
+                      }`}
                       placeholder="Ex: Vegetariano, Sem Glúten, Alergia a Marisco..."
                     />
+                    {restricoesError && (
+                      <p className="text-red-500 text-xs mt-1 ml-1">{restricoesError}</p>
+                    )}
                   </motion.div>
                 )}
 
                 <div className="flex flex-col gap-3">
                   <button 
-                    onClick={handleSubmit}
-                    disabled={isSubmitting || (formData.restricoesAlimentares && !formData.quaisRestricoes)}
+                    onClick={handleNext}
+                    disabled={isSubmitting}
                     className="w-full py-4 md:py-4 lg:py-4 bg-[#5D8AA8] disabled:opacity-50 text-white rounded-xl font-medium md:text-sm lg:text-base shadow-md transition-all flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? 'A enviar...' : 'Finalizar RSVP'}
