@@ -339,7 +339,7 @@ const App: React.FC = () => {
                     onde iremos celebrar o nosso Casamento. A Missa decorrerá na <span className="italic">Igreja de Nossa Senhora da Salvação</span>, em Arruda dos Vinhos, e o jantar na <span className="italic">Quinta da Sardinha</span>, em Marinhais.
                   </p>
                   <p className="mb-4">Em breve daremos mais novidades e indicações.</p>
-                  <p className="mb-4">Pedimos que preencham o formulário individualmente, por favor.</p>
+                  <p className="mb-4">Pedimos que preencham o formulário individualmente, até ao dia 15 de Março de 2026, por favor.</p>
                   <p>Um abraço e um beijinho grande,<br/><strong className="serif text-[#5D8AA8]">Sofia & Zé Francisco</strong></p>
                 </div>
                 <button 
