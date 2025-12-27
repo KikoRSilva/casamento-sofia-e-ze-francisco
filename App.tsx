@@ -3,12 +3,10 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, ChevronRight, CheckCircle, Mail, User, Info } from 'lucide-react';
 import { FormStep, RSVPFormData } from './types';
+import logo from './logo.png';
 
 // The URL provided by the user for Google Sheets integration
 const SUBMIT_URL = 'https://script.google.com/macros/s/AKfycbxXD04PFI0elHBzOJNJZqPHhXxFsN973qGSmSNg9CJqr8KUxzSGZ6hNOhhhuhFQh5iu1Q/exec';
-
-// Use a relative path string instead of an import to avoid ESM resolution errors for non-JS files
-const LogoPath = './logo.png';
 
 const App: React.FC = () => {
   const [step, setStep] = useState<FormStep>(FormStep.WELCOME);
@@ -81,7 +79,7 @@ const App: React.FC = () => {
           <div className="w-48 h-48 md:w-52 md:h-52 lg:w-56 lg:h-56 mb-6 md:mb-4 lg:mb-4 overflow-hidden rounded-full border-4 border-white shadow-lg bg-stone-100">
             {/* Display the wedding logo using the string path */}
             <img 
-              src={LogoPath} 
+              src={logo} 
               alt="Sofia & Zé Francisco"
               className="w-full h-full object-cover"
             />
