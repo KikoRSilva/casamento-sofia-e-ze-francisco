@@ -6,7 +6,12 @@ import { FormStep, RSVPFormData } from './types';
 import logo from './logo.png';
 
 // The URL provided by the user for Google Sheets integration
-const SUBMIT_URL = 'https://script.google.com/macros/s/AKfycbxXD04PFI0elHBzOJNJZqPHhXxFsN973qGSmSNg9CJqr8KUxzSGZ6hNOhhhuhFQh5iu1Q/exec';
+// Load from environment variable (VITE_ prefix required for Vite to expose it)
+// Must be set in .env file - this will be visible in production bundle but keeps it out of source control
+const SUBMIT_URL = import.meta.env.VITE_SUBMIT_URL;
+if (!SUBMIT_URL) {
+  throw new Error('VITE_SUBMIT_URL environment variable is required. Please create a .env file with VITE_SUBMIT_URL set.');
+}
 
 // Security constants
 const MIN_FORM_COMPLETION_TIME = 10000; // 10 seconds in milliseconds
