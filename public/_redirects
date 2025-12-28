@@ -1,0 +1,3 @@
+# Netlify-style redirects (works with some Digital Ocean setups)
+# For SPA routing - all routes fallback to index.html
+/*    /index.html   200
