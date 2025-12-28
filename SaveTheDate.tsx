@@ -525,7 +525,7 @@ const SaveTheDate: React.FC = () => {
                     Sim
                   </button>
                   <button
-                    onClick={() => updateFormData({ restricoesAlimentares: false })}
+                    onClick={() => updateFormData({ restricoesAlimentares: false, quaisRestricoes: '' })}
                     className={`py-4 md:py-4 lg:py-4 rounded-xl border-2 transition-all md:text-sm lg:text-base ${
                       !formData.restricoesAlimentares 
                         ? 'border-[#5D8AA8] bg-[#5D8AA8]/5 text-[#5D8AA8]' 
