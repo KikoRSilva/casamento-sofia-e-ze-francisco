@@ -14,7 +14,7 @@ if (!SUBMIT_URL) {
 }
 
 // Security constants
-const MIN_FORM_COMPLETION_TIME = 10000; // 10 seconds in milliseconds
+const MIN_FORM_COMPLETION_TIME = 3000; // 3 seconds in milliseconds
 const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5 minutes in milliseconds
 const RATE_LIMIT_STORAGE_KEY = 'rsvp_submissions';
 const MAX_LENGTHS = {
@@ -191,43 +191,44 @@ const SaveTheDate: React.FC = () => {
     return { valid: true };
   };
 
+  const [submitError, setSubmitError] = useState<string>('');
+
   const handleSubmit = async () => {
     if (isSubmitting) return;
-    
+    setSubmitError('');
+
     // Security check 1: Honeypot field must be empty
     if (formData.honeypot && formData.honeypot.trim() !== '') {
       // Silently reject - this is a bot
       console.warn('Bot detected: honeypot field filled');
+      setStep(FormStep.THANK_YOU);
       return;
     }
-    
+
     // Security check 2: Rate limiting
     const rateLimitCheck = checkRateLimit(formData.email);
     if (!rateLimitCheck.allowed) {
       const minutesRemaining = Math.ceil((rateLimitCheck.timeRemaining || 0) / 60000);
-      alert(`Por favor, aguarda ${minutesRemaining} minuto(s) antes de submeter novamente.`);
-      setIsSubmitting(false);
+      setSubmitError(`Por favor, aguarda ${minutesRemaining} minuto(s) antes de submeter novamente.`);
       return;
     }
-    
+
     // Security check 3: Minimum form completion time
     if (formStartTime.current) {
       const timeSpent = Date.now() - formStartTime.current;
       if (timeSpent < MIN_FORM_COMPLETION_TIME) {
-        // Silently reject - form completed too quickly (likely automated)
-        console.warn('Bot detected: form completed too quickly');
-        return;
+        // Likely autofill - allow but log
+        console.info('Fast form completion detected (likely autofill):', timeSpent, 'ms');
       }
     }
-    
+
     // Security check 4: Input validation
     const validation = validateInputs();
     if (!validation.valid) {
-      alert(validation.error || 'Por favor, verifica os dados inseridos.');
-      setIsSubmitting(false);
+      setSubmitError(validation.error || 'Por favor, verifica os dados inseridos.');
       return;
     }
-    
+
     setIsSubmitting(true);
 
     try {
@@ -235,7 +236,7 @@ const SaveTheDate: React.FC = () => {
       const sanitizedNome = sanitizeInput(formData.nome);
       const sanitizedEmail = sanitizeInput(formData.email);
       const sanitizedRestricoes = sanitizeInput(formData.quaisRestricoes);
-      
+
       // Prepare the data as URLSearchParams for compatibility with simple Google Apps Script setups
       const params = new URLSearchParams();
       params.append('Nome Completo', sanitizedNome);
@@ -246,6 +247,10 @@ const SaveTheDate: React.FC = () => {
       params.append('Data de Submissão', new Date().toLocaleString('pt-PT'));
       params.append('token', 'rsvp_2026_sofia_ze_francisco');
 
+      // Add timeout to prevent hanging on slow mobile networks
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
       // We use no-cors because Google Apps Script often doesn't handle CORS preflight (OPTIONS)
       // unless specifically configured. Standard form POSTs work best.
       await fetch(SUBMIT_URL, {
@@ -255,11 +260,14 @@ const SaveTheDate: React.FC = () => {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: params.toString(),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       // Record successful submission for rate limiting
       recordSubmission(formData.email);
-      
+
       // Clear form data to prevent accidental resubmission
       setFormData({
         nome: '',
@@ -275,7 +283,11 @@ const SaveTheDate: React.FC = () => {
       setStep(FormStep.THANK_YOU);
     } catch (error) {
       console.error('Erro ao enviar RSVP:', error);
-      alert('Houve um erro ao enviar a sua resposta. Por favor, tente novamente ou contacte os noivos diretamente.');
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        setSubmitError('O pedido demorou demasiado. Verifica a tua ligação à internet e tenta novamente.');
+      } else {
+        setSubmitError('Houve um erro ao enviar a resposta. Por favor, tenta novamente ou contacta os noivos diretamente.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -408,23 +420,18 @@ const SaveTheDate: React.FC = () => {
                   </div>
                   
                   {/* Honeypot field - hidden from users, visible to bots */}
-                  <input
-                    type="text"
-                    name="website"
-                    value={formData.honeypot || ''}
-                    onChange={(e) => updateFormData({ honeypot: e.target.value })}
-                    tabIndex={-1}
-                    autoComplete="off"
-                    style={{
-                      position: 'absolute',
-                      left: '-9999px',
-                      opacity: 0,
-                      pointerEvents: 'none',
-                      width: '1px',
-                      height: '1px'
-                    }}
-                    aria-hidden="true"
-                  />
+                  <div style={{ position: 'absolute', left: '-9999px', height: 0, overflow: 'hidden' }} aria-hidden="true">
+                    <input
+                      type="text"
+                      name="website"
+                      value={formData.honeypot || ''}
+                      onChange={(e) => updateFormData({ honeypot: e.target.value })}
+                      tabIndex={-1}
+                      autoComplete="new-password"
+                      data-lpignore="true"
+                      data-form-type="other"
+                    />
+                  </div>
                 </div>
 
                 <button 
@@ -479,15 +486,18 @@ const SaveTheDate: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  <button 
+                  {submitError && (
+                    <p className="text-red-500 text-sm text-center bg-red-50 p-3 rounded-xl">{submitError}</p>
+                  )}
+                  <button
                     onClick={handleNext}
                     disabled={isSubmitting}
-                    className="w-full py-4 md:py-4 lg:py-4 bg-[#5D8AA8] text-white rounded-xl font-medium md:text-sm lg:text-base shadow-md transition-all flex items-center justify-center gap-2"
+                    className="w-full py-4 md:py-4 lg:py-4 bg-[#5D8AA8] disabled:opacity-50 text-white rounded-xl font-medium md:text-sm lg:text-base shadow-md transition-all flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? 'A enviar...' : (formData.presenca ? 'Próximo' : 'Confirmar Ausência')}
                     {!isSubmitting && <ChevronRight size={18} />}
                   </button>
-                  <button 
+                  <button
                     onClick={() => setStep(FormStep.DETAILS)}
                     className="text-stone-400 text-sm underline"
                     disabled={isSubmitting}
@@ -564,7 +574,10 @@ const SaveTheDate: React.FC = () => {
                 )}
 
                 <div className="flex flex-col gap-3">
-                  <button 
+                  {submitError && (
+                    <p className="text-red-500 text-sm text-center bg-red-50 p-3 rounded-xl">{submitError}</p>
+                  )}
+                  <button
                     onClick={handleNext}
                     disabled={isSubmitting}
                     className="w-full py-4 md:py-4 lg:py-4 bg-[#5D8AA8] disabled:opacity-50 text-white rounded-xl font-medium md:text-sm lg:text-base shadow-md transition-all flex items-center justify-center gap-2"
@@ -572,7 +585,7 @@ const SaveTheDate: React.FC = () => {
                     {isSubmitting ? 'A enviar...' : 'Finalizar RSVP'}
                     {!isSubmitting && <CheckCircle size={18} />}
                   </button>
-                  <button 
+                  <button
                     onClick={() => setStep(FormStep.PRESENCE)}
                     className="text-stone-400 text-sm underline"
                     disabled={isSubmitting}
