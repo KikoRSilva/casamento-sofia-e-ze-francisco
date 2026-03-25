@@ -75,8 +75,8 @@ function useCountdown() {
 /* ═════════════════════════════════════════════
    MAIN LANDING PAGE
    ═════════════════════════════════════════════ */
-const LandingPage: React.FC = () => {
-  const [introDone, setIntroDone] = useState(false);
+const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) => {
+  const [introDone, setIntroDone] = useState(skipIntro);
   const [showNav, setShowNav] = useState(false);
   const countdown = useCountdown();
   const heroRef = useRef<HTMLDivElement>(null);
@@ -88,6 +88,7 @@ const LandingPage: React.FC = () => {
 
   // Lock scroll during intro
   useEffect(() => {
+    if (skipIntro) return;
     document.body.classList.add('intro-active');
     const timer = setTimeout(() => {
       setIntroDone(true);
@@ -97,7 +98,7 @@ const LandingPage: React.FC = () => {
       clearTimeout(timer);
       document.body.classList.remove('intro-active');
     };
-  }, []);
+  }, [skipIntro]);
 
   // Show nav after intro
   useEffect(() => {
@@ -289,9 +290,9 @@ const LandingPage: React.FC = () => {
           {/* Numbers */}
           <div className="grid grid-cols-4 gap-2 md:gap-6 text-center">
             {([
-              { value: countdown.days,    label: 'Dias'     },
-              { value: countdown.hours,   label: 'Horas'    },
-              { value: countdown.minutes, label: 'Minutos'  },
+              { value: countdown.days, label: 'Dias' },
+              { value: countdown.hours, label: 'Horas' },
+              { value: countdown.minutes, label: 'Minutos' },
               { value: countdown.seconds, label: 'Segundos' },
             ] as const).map((unit, i) => (
               <Reveal key={unit.label} delay={i * 0.1}>
@@ -476,10 +477,9 @@ const LandingPage: React.FC = () => {
         <div className="max-w-3xl mx-auto text-center">
           <SectionHeading>Dress Code</SectionHeading>
           <Reveal>
-            <p className="text-2xl md:text-3xl serif text-stone-700 mb-4">Formal</p>
+            <p className="text-2xl md:text-3xl serif text-stone-700 mb-4">Formal e Elegante</p>
             <p className="text-stone-500 leading-relaxed max-w-lg mx-auto">
-              Pedimos que os nossos convidados venham vestidos com traje formal.
-              O dia promete ser longo e cheio de dança — tragam sapatos confortáveis!
+              Queremos os nossos familiares e amigos no seu melhor para celebrar connosco este dia especial.
             </p>
           </Reveal>
         </div>
