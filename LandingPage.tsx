@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   motion,
   AnimatePresence,
@@ -6,7 +6,218 @@ import {
   useTransform,
   useInView,
 } from 'framer-motion';
-import { ChevronDown, MapPin, Gift, Clock, Church, PartyPopper } from 'lucide-react';
+import { ChevronDown, MapPin, Gift, Church, PartyPopper, Wine, UtensilsCrossed } from 'lucide-react';
+
+/* ─────────────────────────────────────────────
+   Photo Album Intro Component
+   ───────────────────────────────────────────── */
+const ALBUM_PHOTOS = [
+  '/photo-1.jpg', '/photo-2.jpg', '/photo-3.jpg',
+  '/photo-4.jpg', '/photo-5.jpg', '/photo-6.jpg',
+  '/photo-7.jpg', '/photo-8.jpg', '/photo-9.jpg',
+];
+
+// Each "page" has a front and back photo (like a real album spread)
+function useAlbumPages() {
+  return useMemo(() => {
+    const pages: { front: string; back: string | null }[] = [];
+    for (let i = 0; i < ALBUM_PHOTOS.length; i += 2) {
+      pages.push({
+        front: ALBUM_PHOTOS[i],
+        back: ALBUM_PHOTOS[i + 1] ?? null,
+      });
+    }
+    return pages;
+  }, []);
+}
+
+const PAGE_FLIP_DELAY = 1.2;
+const PAGE_FLIP_DURATION = 1.0;
+const COVER_OPEN_DELAY = 0.8;
+
+function useIsVertical() {
+  const [v, setV] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const h = (e: MediaQueryListEvent) => setV(e.matches);
+    mq.addEventListener('change', h);
+    return () => mq.removeEventListener('change', h);
+  }, []);
+  return v;
+}
+
+function AlbumPage({
+  front,
+  back,
+  flipDelay,
+  rightZIndex,
+  leftZIndex,
+  vertical,
+}: {
+  front: string;
+  back: string | null;
+  flipDelay: number;
+  rightZIndex: number;
+  leftZIndex: number;
+  vertical: boolean;
+}) {
+  const [flipped, setFlipped] = useState(false);
+
+  useEffect(() => {
+    const mid = (flipDelay + PAGE_FLIP_DURATION * 0.5) * 1000;
+    const timer = setTimeout(() => setFlipped(true), mid);
+    return () => clearTimeout(timer);
+  }, [flipDelay]);
+
+  const origin = vertical ? 'center bottom' : 'left center';
+  const anim = vertical ? { rotateX: -180 } : { rotateY: -180 };
+  const backTransform = vertical ? 'rotateX(180deg)' : 'rotateY(180deg)';
+
+  // Border radius: outer edge only
+  // Horizontal: front=right, back=left | Vertical: front=top, back=bottom
+  const frontRadius = vertical ? 'rounded-t-lg' : 'rounded-r-lg';
+  const backRadius = vertical ? 'rounded-b-lg' : 'rounded-l-lg';
+
+  // Spine shadow position
+  const frontShadow = vertical
+    ? 'absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-black/10 to-transparent'
+    : 'absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-black/10 to-transparent';
+  const backShadow = vertical
+    ? 'absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-black/10 to-transparent'
+    : 'absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-black/10 to-transparent';
+
+  return (
+    <motion.div
+      className="absolute inset-0"
+      style={{
+        transformStyle: 'preserve-3d',
+        transformOrigin: origin,
+        zIndex: flipped ? leftZIndex : rightZIndex,
+      }}
+      initial={vertical ? { rotateX: 0 } : { rotateY: 0 }}
+      animate={anim}
+      transition={{
+        delay: flipDelay,
+        duration: PAGE_FLIP_DURATION,
+        ease: [0.645, 0.045, 0.355, 1],
+      }}
+    >
+      {/* Front of page */}
+      <div
+        className={`absolute inset-0 ${frontRadius} overflow-hidden`}
+        style={{ backfaceVisibility: 'hidden' }}
+      >
+        <img src={front} alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
+        <div className={frontShadow} />
+      </div>
+      {/* Back of page */}
+      <div
+        className={`absolute inset-0 ${backRadius} overflow-hidden`}
+        style={{ backfaceVisibility: 'hidden', transform: backTransform }}
+      >
+        {back ? (
+          <img src={back} alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full bg-[#f5f0e8] flex items-center justify-center">
+            <p className="text-[#5D8AA8]/40 serif text-2xl md:text-3xl italic">S&ZF</p>
+          </div>
+        )}
+        <div className={backShadow} />
+      </div>
+    </motion.div>
+  );
+}
+
+function PhotoAlbum() {
+  const pages = useAlbumPages();
+  const vertical = useIsVertical();
+  const totalLayers = pages.length + 1;
+  const [coverFlipped, setCoverFlipped] = useState(false);
+
+  useEffect(() => {
+    const mid = (COVER_OPEN_DELAY + PAGE_FLIP_DURATION * 0.5) * 1000;
+    const timer = setTimeout(() => setCoverFlipped(true), mid);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const origin = vertical ? 'center bottom' : 'left center';
+  const coverAnim = vertical ? { rotateX: -180 } : { rotateY: -180 };
+  const coverInit = vertical ? { rotateX: 0 } : { rotateY: 0 };
+  const backTransform = vertical ? 'rotateX(180deg)' : 'rotateY(180deg)';
+
+  // Border radius per mode
+  const frontRadius = vertical ? 'rounded-t-lg' : 'rounded-r-lg';
+  const backRadius = vertical ? 'rounded-b-lg' : 'rounded-l-lg';
+  const coverBorderInner = vertical ? 'rounded-t' : 'rounded-r';
+
+  return (
+    <div
+      className="relative w-[220px] h-[300px] md:w-[400px] md:h-[540px]"
+      style={{ perspective: '1500px' }}
+    >
+      {/* Book shadow */}
+      <div className="absolute -bottom-4 left-4 right-4 h-8 bg-black/15 rounded-full blur-xl" />
+
+      {/* Back cover (static) */}
+      <div className={`absolute inset-0 ${frontRadius} bg-gradient-to-br from-[#5D8AA8] to-[#3E6B8A] shadow-xl`}>
+        <div className={`absolute inset-2 ${coverBorderInner} border border-[#8BB8D4]/30`} />
+      </div>
+
+      {/* Album pages */}
+      {pages.map((page, i) => (
+        <AlbumPage
+          key={i}
+          front={page.front}
+          back={page.back}
+          flipDelay={COVER_OPEN_DELAY + PAGE_FLIP_DURATION + i * PAGE_FLIP_DELAY}
+          rightZIndex={totalLayers - i}
+          leftZIndex={totalLayers + i + 2}
+          vertical={vertical}
+        />
+      ))}
+
+      {/* Front cover */}
+      <motion.div
+        className="absolute inset-0"
+        style={{
+          transformStyle: 'preserve-3d',
+          transformOrigin: origin,
+          zIndex: coverFlipped ? 1 : totalLayers + 1,
+        }}
+        initial={coverInit}
+        animate={coverAnim}
+        transition={{
+          delay: COVER_OPEN_DELAY,
+          duration: PAGE_FLIP_DURATION,
+          ease: [0.645, 0.045, 0.355, 1],
+        }}
+      >
+        {/* Cover front */}
+        <div
+          className={`absolute inset-0 ${frontRadius} bg-gradient-to-br from-[#6B9DBF] to-[#4A7A9B] shadow-2xl flex flex-col items-center justify-center`}
+          style={{ backfaceVisibility: 'hidden' }}
+        >
+          <div className={`absolute inset-2 ${coverBorderInner} border border-[#8BB8D4]/40`} />
+          <div className={`absolute inset-4 ${coverBorderInner} border border-[#8BB8D4]/20`} />
+          <p className="serif text-[#f5f0e8] text-3xl md:text-5xl font-bold tracking-wide">S&ZF</p>
+          <div className="w-16 h-px bg-[#f5f0e8]/40 my-3" />
+          <p className="text-[#f5f0e8]/70 text-sm md:text-base tracking-[0.3em] font-light">27 · 06 · 2026</p>
+        </div>
+        {/* Cover back (inside) */}
+        <div
+          className={`absolute inset-0 ${backRadius} bg-[#f5f0e8]`}
+          style={{ backfaceVisibility: 'hidden', transform: backTransform }}
+        >
+          <div className="w-full h-full flex items-center justify-center">
+            <p className="text-[#5D8AA8]/30 serif text-xl md:text-2xl italic">bem-vindos</p>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
 
 /* ─────────────────────────────────────────────
    Reusable scroll-reveal wrapper
@@ -93,7 +304,7 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
     const timer = setTimeout(() => {
       setIntroDone(true);
       document.body.classList.remove('intro-active');
-    }, 6500);
+    }, 8500);
     return () => {
       clearTimeout(timer);
       document.body.classList.remove('intro-active');
@@ -123,80 +334,14 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
             exit={{ y: '-100%' }}
             transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }}
           >
-            {/* 9 staggered photos — organic scattered collage */}
+            {/* Photo album — offset right so spine stays centered when pages flip left */}
             <motion.div
-              className="absolute top-[2%] left-[2%] w-40 h-56 md:w-72 md:h-96 rounded-lg overflow-hidden shadow-xl"
-              initial={{ opacity: 0, scale: 0.8, rotate: -6 }}
-              animate={{ opacity: 1, scale: 1, rotate: -6 }}
-              transition={{ delay: 0.3, duration: 1.0 }}
+              className="-translate-y-[150px] md:translate-y-0 md:translate-x-[200px]"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8 }}
             >
-              <img src="/photo-1.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
-            </motion.div>
-            <motion.div
-              className="absolute top-[8%] left-[30%] w-44 h-60 md:w-76 md:h-100 rounded-lg overflow-hidden shadow-xl"
-              initial={{ opacity: 0, scale: 0.8, rotate: 4 }}
-              animate={{ opacity: 1, scale: 1, rotate: 4 }}
-              transition={{ delay: 0.8, duration: 1.0 }}
-            >
-              <img src="/photo-2.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
-            </motion.div>
-            <motion.div
-              className="absolute top-[1%] right-[6%] w-40 h-56 md:w-68 md:h-88 rounded-lg overflow-hidden shadow-xl"
-              initial={{ opacity: 0, scale: 0.8, rotate: -2 }}
-              animate={{ opacity: 1, scale: 1, rotate: -2 }}
-              transition={{ delay: 1.3, duration: 1.0 }}
-            >
-              <img src="/photo-3.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
-            </motion.div>
-
-            <motion.div
-              className="absolute top-[38%] left-[6%] w-44 h-60 md:w-72 md:h-96 rounded-lg overflow-hidden shadow-xl"
-              initial={{ opacity: 0, scale: 0.8, rotate: 5 }}
-              animate={{ opacity: 1, scale: 1, rotate: 5 }}
-              transition={{ delay: 1.8, duration: 1.0 }}
-            >
-              <img src="/photo-4.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
-            </motion.div>
-            <motion.div
-              className="absolute top-[30%] left-[38%] w-40 h-56 md:w-68 md:h-88 rounded-lg overflow-hidden shadow-xl"
-              initial={{ opacity: 0, scale: 0.8, rotate: -3 }}
-              animate={{ opacity: 1, scale: 1, rotate: -3 }}
-              transition={{ delay: 2.3, duration: 1.0 }}
-            >
-              <img src="/photo-5.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
-            </motion.div>
-            <motion.div
-              className="absolute top-[40%] right-[2%] w-44 h-60 md:w-72 md:h-96 rounded-lg overflow-hidden shadow-xl"
-              initial={{ opacity: 0, scale: 0.8, rotate: 3 }}
-              animate={{ opacity: 1, scale: 1, rotate: 3 }}
-              transition={{ delay: 2.8, duration: 1.0 }}
-            >
-              <img src="/photo-6.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
-            </motion.div>
-
-            <motion.div
-              className="absolute bottom-[8%] left-[3%] w-40 h-56 md:w-68 md:h-88 rounded-lg overflow-hidden shadow-xl"
-              initial={{ opacity: 0, scale: 0.8, rotate: -4 }}
-              animate={{ opacity: 1, scale: 1, rotate: -4 }}
-              transition={{ delay: 3.3, duration: 1.0 }}
-            >
-              <img src="/photo-7.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
-            </motion.div>
-            <motion.div
-              className="absolute bottom-[2%] left-[32%] w-44 h-60 md:w-74 md:h-96 rounded-lg overflow-hidden shadow-xl"
-              initial={{ opacity: 0, scale: 0.8, rotate: 2 }}
-              animate={{ opacity: 1, scale: 1, rotate: 2 }}
-              transition={{ delay: 3.8, duration: 1.0 }}
-            >
-              <img src="/photo-8.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
-            </motion.div>
-            <motion.div
-              className="absolute bottom-[6%] right-[5%] w-40 h-56 md:w-68 md:h-88 rounded-lg overflow-hidden shadow-xl"
-              initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
-              animate={{ opacity: 1, scale: 1, rotate: -5 }}
-              transition={{ delay: 4.3, duration: 1.0 }}
-            >
-              <img src="/photo-9.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
+              <PhotoAlbum />
             </motion.div>
 
             {/* Couple names tease */}
@@ -204,7 +349,7 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
               className="absolute bottom-8 text-[#5D8AA8]/60 text-lg tracking-[0.3em] uppercase font-light"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 4.5, duration: 1.0 }}
+              transition={{ delay: 1.5, duration: 1.0 }}
             >
               Sofia & Zé Francisco
             </motion.p>
@@ -367,33 +512,92 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
         </div>
       </section>
 
-      {/* ───── O DIA (SCHEDULE) ───── */}
-      <section className="py-24 md:py-32 px-6 bg-white/50">
-        <div className="max-w-5xl mx-auto">
+      {/* ───── O DIA (TIMELINE) ───── */}
+      <section className="py-24 md:py-32 px-6 bg-white/50 overflow-hidden">
+        <div className="max-w-4xl mx-auto">
           <SectionHeading>O Dia</SectionHeading>
 
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12">
-            {/* Cerimónia */}
-            <Reveal>
-              <ScheduleCard
-                icon={<Church size={32} className="text-[#5D8AA8]" />}
-                title="Cerimónia"
-                time="15:00"
-                venue="Igreja de Nossa Senhora da Salvação"
-                location="Arruda dos Vinhos"
-              />
-            </Reveal>
+          {/* Horizontal timeline */}
+          <div className="relative flex items-start justify-between px-4 md:px-12">
 
-            {/* Festa */}
-            <Reveal delay={0.15}>
-              <ScheduleCard
-                icon={<PartyPopper size={32} className="text-[#5D8AA8]" />}
-                title="Festa"
-                time="19:00"
-                venue="Quinta da Sardinha"
-                location="Marinhais"
-              />
-            </Reveal>
+            {/* Swirl connectors between icons */}
+            <svg
+              className="absolute left-0 right-0 w-full pointer-events-none z-0"
+              style={{ top: 20, height: 50 }}
+              viewBox="0 0 800 50"
+              fill="none"
+            >
+              {[0, 1, 2].map((seg) => {
+                // Each icon center is at 100, 300, 500, 700 in an 800-wide viewBox
+                const x1 = seg * 200 + 130;
+                const x2 = (seg + 1) * 200 + 70;
+                const span = x2 - x1;
+                const lx1 = x1 + span * 0.33;
+                const lx2 = x1 + span * 0.67;
+                const r = 5;
+                return (
+                  <path
+                    key={seg}
+                    d={[
+                      `M${x1},28`,
+                      `Q${(x1 + lx1) / 2},46 ${lx1},28`,
+                      `a${r},${r} 0 1,0 0.01,0`,
+                      `Q${(lx1 + lx2) / 2},46 ${lx2},28`,
+                      `a${r},${r} 0 1,0 0.01,0`,
+                      `Q${(lx2 + x2) / 2},46 ${x2},28`,
+                    ].join(' ')}
+                    stroke="#5D8AA8"
+                    strokeOpacity={0.3}
+                    strokeWidth={0.8}
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                );
+              })}
+            </svg>
+
+            {([
+              {
+                time: '15:30',
+                title: 'Cerimónia',
+                icon: <Church size={52} className="md:hidden" />,
+                iconLg: <Church size={72} className="hidden md:block" />,
+              },
+              {
+                time: '18:30',
+                title: 'Cocktails',
+                icon: <Wine size={52} className="md:hidden" />,
+                iconLg: <Wine size={72} className="hidden md:block" />,
+              },
+              {
+                time: '20:30',
+                title: 'Jantar',
+                icon: <UtensilsCrossed size={52} className="md:hidden" />,
+                iconLg: <UtensilsCrossed size={72} className="hidden md:block" />,
+              },
+              {
+                time: '23:00',
+                title: 'Festa',
+                icon: <PartyPopper size={52} className="md:hidden" />,
+                iconLg: <PartyPopper size={72} className="hidden md:block" />,
+              },
+            ] as const).map((event, i) => (
+              <Reveal key={i} delay={i * 0.15} className="flex flex-col items-center text-center flex-1 relative z-10">
+                {/* Icon */}
+                <div className="text-[#5D8AA8]">
+                  {event.icon}
+                  {event.iconLg}
+                </div>
+                {/* Time */}
+                <span className="mt-3 text-[#5D8AA8] font-bold text-lg md:text-xl serif tabular-nums">
+                  {event.time}
+                </span>
+                {/* Title */}
+                <span className="mt-1 text-stone-700 text-xs md:text-sm font-medium tracking-wide">
+                  {event.title}
+                </span>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
@@ -579,47 +783,6 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
     </div>
   );
 };
-
-/* ─────────────────────────────────────────────
-   Schedule Card
-   ───────────────────────────────────────────── */
-function ScheduleCard({
-  icon,
-  title,
-  time,
-  venue,
-  location,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  time: string;
-  venue: string;
-  location: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  });
-  const scale = useTransform(scrollYProgress, [0, 0.4], [0.92, 1]);
-
-  return (
-    <motion.div
-      ref={ref}
-      style={{ scale }}
-      className="bg-white rounded-2xl p-8 md:p-10 shadow-sm border border-stone-100 text-center"
-    >
-      <div className="flex justify-center mb-5">{icon}</div>
-      <h3 className="text-2xl font-bold serif text-stone-800 mb-3">{title}</h3>
-      <div className="flex items-center justify-center gap-2 text-[#5D8AA8] font-medium text-lg mb-4">
-        <Clock size={16} />
-        {time}
-      </div>
-      <p className="text-stone-600 font-medium">{venue}</p>
-      <p className="text-stone-400 text-sm mt-1">{location}</p>
-    </motion.div>
-  );
-}
 
 /* ─────────────────────────────────────────────
    Venue Card with Map
