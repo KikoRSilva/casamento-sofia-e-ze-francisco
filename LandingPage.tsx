@@ -249,13 +249,13 @@ function Reveal({
 /* ─────────────────────────────────────────────
    Section heading component
    ───────────────────────────────────────────── */
-function SectionHeading({ children }: { children: React.ReactNode }) {
+function SectionHeading({ children, light = false }: { children: React.ReactNode; light?: boolean }) {
   return (
     <Reveal>
-      <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#5D8AA8] serif text-center mb-4">
+      <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold serif text-center mb-4 ${light ? 'text-white' : 'text-[#5D8AA8]'}`}>
         {children}
       </h2>
-      <div className="w-16 h-[2px] bg-[#5D8AA8]/30 mx-auto mb-12" />
+      <div className={`w-16 h-[2px] mx-auto mb-12 ${light ? 'bg-white/30' : 'bg-[#5D8AA8]/30'}`} />
     </Reveal>
   );
 }
@@ -346,7 +346,7 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
 
             {/* Couple names tease */}
             <motion.p
-              className="absolute bottom-8 text-[#5D8AA8]/60 text-lg tracking-[0.3em] uppercase font-light"
+              className="absolute bottom-8 text-[#5D8AA8]/60 text-lg tracking-[0.3em] uppercase font-light hidden md:block"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.5, duration: 1.0 }}
@@ -558,7 +558,7 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
 
             {([
               {
-                time: '15:30',
+                time: '16:00',
                 title: 'Cerimónia',
                 icon: <Church size={52} className="md:hidden" />,
                 iconLg: <Church size={72} className="hidden md:block" />,
@@ -602,27 +602,160 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
         </div>
       </section>
 
-      {/* ───── VENUE / MAP ───── */}
+      {/* ───── IGREJA ───── */}
       <section id="mapa" className="py-24 md:py-32 px-6">
         <div className="max-w-5xl mx-auto">
-          <SectionHeading>Locais</SectionHeading>
+          <SectionHeading>Igreja</SectionHeading>
 
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12">
-            <Reveal>
-              <VenueCard
-                title="Igreja de Nossa Senhora da Salvação"
-                address="Arruda dos Vinhos"
-                mapsQuery="Igreja+de+Nossa+Senhora+da+Salvação+Arruda+dos+Vinhos"
+          {/* Image + Map side by side */}
+          <Reveal>
+            <div className="grid md:grid-cols-2 gap-6 md:gap-10 items-stretch">
+              {/* Church image */}
+              <div className="relative rounded-2xl overflow-hidden border border-stone-100 bg-white shadow-sm">
+                <img
+                  src="/igreja-pastel.png"
+                  alt="Igreja de Nossa Senhora da Salvação"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/50 to-transparent pt-10 pb-4 px-4 text-center">
+                  <h3 className="text-white text-lg md:text-xl font-bold serif drop-shadow-md">
+                    Igreja de Nossa Senhora da Salvação
+                  </h3>
+                  <p className="text-white/80 text-sm mt-1 drop-shadow-md">Arruda dos Vinhos</p>
+                </div>
+              </div>
+              {/* Map */}
+              <div className="rounded-2xl overflow-hidden border border-stone-100 bg-white shadow-sm flex flex-col">
+                <div className="flex-1 min-h-[280px] md:min-h-0 bg-stone-100">
+                  <iframe
+                    title="Igreja de Nossa Senhora da Salvação"
+                    src="https://www.google.com/maps?q=Igreja+de+Nossa+Senhora+da+Salvação+Arruda+dos+Vinhos&output=embed"
+                    className="w-full h-full border-0"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
+                <div className="p-4 text-center">
+                  <a
+                    href="https://www.google.com/maps/search/?api=1&query=Igreja+de+Nossa+Senhora+da+Salvação+Arruda+dos+Vinhos"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#5D8AA8] text-white rounded-lg font-medium text-sm shadow-sm hover:bg-[#4A6E86] hover:scale-105 transition-all duration-300"
+                  >
+                    <MapPin size={16} />
+                    Como Chegar
+                  </a>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+
+          {/* Onde estacionar */}
+          <Reveal delay={0.2}>
+            <h3 className="text-xl md:text-2xl font-bold serif text-[#5D8AA8] text-center mt-14 mb-3">
+              Onde estacionar?
+            </h3>
+            <p className="text-stone-500 text-sm md:text-base text-center mb-6 max-w-xxl mx-auto">
+              A igreja tem difícil acesso de carro, recomendamos que estacionem neste parque gratuito.
+            </p>
+            <div className="rounded-2xl overflow-hidden border border-stone-100 bg-white shadow-sm">
+              <div className="w-full h-56 md:h-72 bg-stone-100">
+                <iframe
+                  title="Estacionamento perto da Igreja"
+                  src="https://www.google.com/maps?q=Estacionamento+gratuito,+R.+Irene+Lisboa,+2630-243+Arruda+dos+Vinhos&output=embed"
+                  className="w-full h-full border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+              <div className="p-4 text-center">
+                <a
+                  href="https://maps.app.goo.gl/EGQrCAZTSYnLXhwD9?g_st=iw"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm text-[#5D8AA8] hover:underline font-medium"
+                >
+                  <MapPin size={14} />
+                  Ver no Google Maps
+                </a>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ───── QUINTA DA SARDINHA ───── */}
+      <section className="py-24 md:py-32 px-6 bg-[#5D8AA8] text-white">
+        <div className="max-w-5xl mx-auto">
+          <SectionHeading light>Cocktail e Jantar</SectionHeading>
+
+          <Reveal>
+            <div className="grid md:grid-cols-2 gap-6 md:gap-10 items-stretch">
+              {/* Quinta image */}
+              <div className="relative rounded-2xl overflow-hidden border border-stone-100 bg-white shadow-sm">
+                <img
+                  src="/quinta-pastel.png"
+                  alt="Quinta da Sardinha"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/50 to-transparent pt-10 pb-4 px-4 text-center">
+                  <h3 className="text-white text-lg md:text-xl font-bold serif drop-shadow-md">
+                    Quinta da Sardinha
+                  </h3>
+                  <p className="text-white/80 text-sm mt-1 drop-shadow-md">Marinhais</p>
+                </div>
+              </div>
+              {/* Map */}
+              <div className="rounded-2xl overflow-hidden border border-stone-100 bg-white shadow-sm flex flex-col">
+                <div className="flex-1 min-h-[280px] md:min-h-0 bg-stone-100">
+                  <iframe
+                    title="Quinta da Sardinha"
+                    src="https://www.google.com/maps?q=Quinta+da+Sardinha+Marinhais&output=embed"
+                    className="w-full h-full border-0"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
+                <div className="p-4 text-center">
+                  <a
+                    href="https://www.google.com/maps/search/?api=1&query=Quinta+da+Sardinha+Marinhais"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#5D8AA8] text-white rounded-lg font-medium text-sm shadow-sm hover:bg-[#4A6E86] hover:scale-105 transition-all duration-300"
+                  >
+                    <MapPin size={16} />
+                    Como Chegar
+                  </a>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+
+        </div>
+      </section>
+
+      {/* ───── ROTA ALTERNATIVA ───── */}
+      <section className="py-16 md:py-20 px-6 bg-[#E8E0D4]">
+        <div className="max-w-xl mx-auto text-center">
+          <Reveal>
+            <p className="text-2xl mb-3">⚠️</p>
+            <p className="text-stone-700 font-semibold text-base md:text-lg leading-relaxed">
+              Neste dia estarão a decorrer as festas da Sardinha Assada, em Benavente, e a estrada EN118 em direção à quinta estará cortada até perto das 21h.
+            </p>
+            <p className="text-stone-500 text-sm mt-4 mb-5">Rota alternativa sugerida:</p>
+            <a
+              href="https://www.google.com/maps/dir/?api=1&destination=Quinta+da+Sardinha+Marinhais&travelmode=driving"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-block"
+            >
+              <img
+                src="/mapa-alternativa.png"
+                alt="Mapa com rota alternativa para a Quinta da Sardinha"
+                className="w-64 h-auto group-hover:scale-[1.02] transition-transform duration-500"
               />
-            </Reveal>
-            <Reveal delay={0.15}>
-              <VenueCard
-                title="Quinta da Sardinha"
-                address="Marinhais"
-                mapsQuery="Quinta+da+Sardinha+Marinhais"
-              />
-            </Reveal>
-          </div>
+            </a>
+          </Reveal>
         </div>
       </section>
 
@@ -643,6 +776,7 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
                 tagColor: 'bg-[#5D8AA8]/10 text-[#5D8AA8]',
                 desc: 'Quinta rural em Salvaterra de Magos com piscina, equitação e bicicletas. 5 quartos, estacionamento gratuito e vistas campestres.',
                 url: 'https://www.visitribatejo.pt/en/catalogue/where-to-sleep/rural-tourism/casa-do-massapez/',
+                img: 'https://www.visitribatejo.pt/fotos/produtos/r_ht_0024_p.jpg',
               },
               {
                 name: 'Sítio do Chíron',
@@ -650,6 +784,7 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
                 tagColor: 'bg-[#768D5D]/10 text-[#768D5D]',
                 desc: 'Quinta privada com piscina, jacuzzi, jardim com árvores de fruto e sala de jogos. A 4 minutos de supermercados e restaurantes.',
                 url: 'https://www.airbnb.com/rooms/1125992685191588164',
+                img: 'https://www.mybesthotel.eu/pic/_0cd1e10a_dddb_4e63_ab1b_691d1898e99b_658059d9ed778.jpg',
               },
               {
                 name: 'Quinta da Lagoa',
@@ -657,6 +792,7 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
                 tagColor: 'bg-[#768D5D]/10 text-[#768D5D]',
                 desc: 'Alojamento local no coração de Marinhais, a poucos minutos da quinta. Piscina exterior e interior aquecida, 4 quartos para até 8 hóspedes.',
                 url: 'https://www.booking.com/hotel/pt/wunderschones-landhaus-mit-pool-in-der-nahe-von-santarem.html',
+                img: 'https://www.visitribatejo.pt/fotos/produtos/quinta_da_lagoa_3__19512886005caf56866ed2c.jpg',
               },
               {
                 name: 'Sete Quintas Country House',
@@ -664,6 +800,7 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
                 tagColor: 'bg-[#5D8AA8]/10 text-[#5D8AA8]',
                 desc: 'Casa de campo em Salvaterra de Magos com piscina, jardim e estacionamento gratuito. Classificação de 9.5/10 em mais de 100 avaliações.',
                 url: 'https://www.pt-ribatejo.com/pt/property/7-quintas-country-house.html',
+                img: 'https://www.pt-ribatejo.com/data/Photos/OriginalPhoto/13884/1388450/1388450960/photo-sete-quintas-country-house-salvaterra-de-magos-1.JPEG',
               },
               {
                 name: 'Salvaterra Country House & Spa',
@@ -671,6 +808,7 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
                 tagColor: 'bg-amber-50 text-amber-700',
                 desc: 'Retiro verde no coração do Ribatejo com spa, piscina e jardim tropical. A 35 minutos de Lisboa e perto da quinta.',
                 url: 'https://salvaterracountryhouse.com',
+                img: 'https://www.pt-ribatejo.com/data/Photos/OriginalPhoto/13424/1342454/1342454603/photo-salvaterra-country-house-spa-salvaterra-de-magos-1.JPEG',
               },
               {
                 name: 'Chalés do Tejo',
@@ -678,6 +816,7 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
                 tagColor: 'bg-[#5D8AA8]/10 text-[#5D8AA8]',
                 desc: 'Chalés modernos em Porto do Sabugueiro, Muge, junto ao Tejo. Várias tipologias para 3 a 7 pessoas, em pleno coração do Ribatejo.',
                 url: 'https://chalesdotejo.pt',
+                img: 'https://chalesdotejo.pt/public/uploads/62e32128-92dc-430a-a3df-47bdeeee551a.jpg',
               },
             ].map((place, i) => (
               <Reveal key={i} delay={i * 0.1}>
@@ -685,14 +824,24 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
                   href={place.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group block bg-white rounded-2xl p-6 shadow-sm border border-stone-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+                  className="group flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300"
                 >
-                  <span className={`inline-block text-xs font-medium px-3 py-1 rounded-full mb-3 ${place.tagColor}`}>
-                    {place.tag}
-                  </span>
-                  <h3 className="font-semibold text-stone-700 mb-2 group-hover:text-[#5D8AA8] transition-colors">{place.name}</h3>
-                  <p className="text-stone-500 text-sm leading-relaxed">{place.desc}</p>
-                  <p className="mt-4 text-xs text-[#5D8AA8] font-medium">Ver alojamento →</p>
+                  <div className="aspect-[16/10] overflow-hidden bg-stone-100 shrink-0">
+                    <img
+                      src={place.img}
+                      alt={place.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="p-6 flex flex-col flex-1">
+                    <span className={`inline-block text-xs font-medium px-3 py-1 rounded-full mb-3 self-start ${place.tagColor}`}>
+                      {place.tag}
+                    </span>
+                    <h3 className="font-semibold text-stone-700 mb-2 group-hover:text-[#5D8AA8] transition-colors">{place.name}</h3>
+                    <p className="text-stone-500 text-sm leading-relaxed flex-1">{place.desc}</p>
+                    <p className="mt-4 text-xs text-[#5D8AA8] font-medium">Ver alojamento →</p>
+                  </div>
                 </a>
               </Reveal>
             ))}
@@ -783,46 +932,5 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
     </div>
   );
 };
-
-/* ─────────────────────────────────────────────
-   Venue Card with Map
-   ───────────────────────────────────────────── */
-function VenueCard({
-  title,
-  address,
-  mapsQuery,
-}: {
-  title: string;
-  address: string;
-  mapsQuery: string;
-}) {
-  return (
-    <div className="rounded-2xl overflow-hidden border border-stone-100 bg-white shadow-sm">
-      {/* Map embed */}
-      <div className="w-full h-56 md:h-64 bg-stone-100">
-        <iframe
-          title={title}
-          src={`https://www.google.com/maps?q=${mapsQuery}&output=embed`}
-          className="w-full h-full border-0"
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        />
-      </div>
-      <div className="p-6 text-center">
-        <h3 className="text-lg font-bold serif text-stone-800 mb-1">{title}</h3>
-        <p className="text-stone-400 text-sm mb-4">{address}</p>
-        <a
-          href={`https://www.google.com/maps/search/?api=1&query=${mapsQuery}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-sm text-[#5D8AA8] hover:underline font-medium"
-        >
-          <MapPin size={14} />
-          Como Chegar
-        </a>
-      </div>
-    </div>
-  );
-}
 
 export default LandingPage;
