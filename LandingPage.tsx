@@ -93,7 +93,7 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
     const timer = setTimeout(() => {
       setIntroDone(true);
       document.body.classList.remove('intro-active');
-    }, 3800);
+    }, 6500);
     return () => {
       clearTimeout(timer);
       document.body.classList.remove('intro-active');
@@ -123,56 +123,80 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
             exit={{ y: '-100%' }}
             transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }}
           >
-            {/* 6 staggered photos */}
+            {/* 9 staggered photos — organic scattered collage */}
             <motion.div
-              className="absolute top-[10%] left-[8%] w-56 h-72 md:w-72 md:h-96 rounded-lg overflow-hidden shadow-xl"
+              className="absolute top-[2%] left-[2%] w-40 h-56 md:w-72 md:h-96 rounded-lg overflow-hidden shadow-xl"
               initial={{ opacity: 0, scale: 0.8, rotate: -6 }}
               animate={{ opacity: 1, scale: 1, rotate: -6 }}
-              transition={{ delay: 0.3, duration: 0.8 }}
+              transition={{ delay: 0.3, duration: 1.0 }}
             >
               <img src="/photo-1.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
             </motion.div>
             <motion.div
-              className="absolute top-[25%] right-[10%] w-60 h-80 md:w-72 md:h-96 rounded-lg overflow-hidden shadow-xl"
+              className="absolute top-[8%] left-[30%] w-44 h-60 md:w-76 md:h-100 rounded-lg overflow-hidden shadow-xl"
               initial={{ opacity: 0, scale: 0.8, rotate: 4 }}
               animate={{ opacity: 1, scale: 1, rotate: 4 }}
-              transition={{ delay: 0.8, duration: 0.8 }}
+              transition={{ delay: 0.8, duration: 1.0 }}
             >
               <img src="/photo-2.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
             </motion.div>
             <motion.div
-              className="absolute bottom-[12%] left-1/2 -translate-x-1/2 w-64 h-80 md:w-80 md:h-105 rounded-lg overflow-hidden shadow-xl"
+              className="absolute top-[1%] right-[6%] w-40 h-56 md:w-68 md:h-88 rounded-lg overflow-hidden shadow-xl"
               initial={{ opacity: 0, scale: 0.8, rotate: -2 }}
               animate={{ opacity: 1, scale: 1, rotate: -2 }}
-              transition={{ delay: 1.3, duration: 0.8 }}
+              transition={{ delay: 1.3, duration: 1.0 }}
             >
               <img src="/photo-3.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
             </motion.div>
 
-            {/* Photos 4–6 */}
             <motion.div
-              className="absolute top-[5%] right-[8%] w-44 h-60 md:w-56 md:h-72 rounded-lg overflow-hidden shadow-xl"
-              initial={{ opacity: 0, scale: 0.8, rotate: 7 }}
-              animate={{ opacity: 1, scale: 1, rotate: 7 }}
-              transition={{ delay: 1.7, duration: 0.8 }}
+              className="absolute top-[38%] left-[6%] w-44 h-60 md:w-72 md:h-96 rounded-lg overflow-hidden shadow-xl"
+              initial={{ opacity: 0, scale: 0.8, rotate: 5 }}
+              animate={{ opacity: 1, scale: 1, rotate: 5 }}
+              transition={{ delay: 1.8, duration: 1.0 }}
             >
               <img src="/photo-4.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
             </motion.div>
             <motion.div
-              className="absolute bottom-[8%] left-[6%] w-48 h-64 md:w-60 md:h-80 rounded-lg overflow-hidden shadow-xl"
-              initial={{ opacity: 0, scale: 0.8, rotate: -4 }}
-              animate={{ opacity: 1, scale: 1, rotate: -4 }}
-              transition={{ delay: 2.1, duration: 0.8 }}
+              className="absolute top-[30%] left-[38%] w-40 h-56 md:w-68 md:h-88 rounded-lg overflow-hidden shadow-xl"
+              initial={{ opacity: 0, scale: 0.8, rotate: -3 }}
+              animate={{ opacity: 1, scale: 1, rotate: -3 }}
+              transition={{ delay: 2.3, duration: 1.0 }}
             >
               <img src="/photo-5.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
             </motion.div>
             <motion.div
-              className="absolute bottom-[15%] right-[5%] w-44 h-56 md:w-56 md:h-72 rounded-lg overflow-hidden shadow-xl"
+              className="absolute top-[40%] right-[2%] w-44 h-60 md:w-72 md:h-96 rounded-lg overflow-hidden shadow-xl"
               initial={{ opacity: 0, scale: 0.8, rotate: 3 }}
               animate={{ opacity: 1, scale: 1, rotate: 3 }}
-              transition={{ delay: 2.5, duration: 0.8 }}
+              transition={{ delay: 2.8, duration: 1.0 }}
             >
               <img src="/photo-6.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
+            </motion.div>
+
+            <motion.div
+              className="absolute bottom-[8%] left-[3%] w-40 h-56 md:w-68 md:h-88 rounded-lg overflow-hidden shadow-xl"
+              initial={{ opacity: 0, scale: 0.8, rotate: -4 }}
+              animate={{ opacity: 1, scale: 1, rotate: -4 }}
+              transition={{ delay: 3.3, duration: 1.0 }}
+            >
+              <img src="/photo-7.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
+            </motion.div>
+            <motion.div
+              className="absolute bottom-[2%] left-[32%] w-44 h-60 md:w-74 md:h-96 rounded-lg overflow-hidden shadow-xl"
+              initial={{ opacity: 0, scale: 0.8, rotate: 2 }}
+              animate={{ opacity: 1, scale: 1, rotate: 2 }}
+              transition={{ delay: 3.8, duration: 1.0 }}
+            >
+              <img src="/photo-8.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
+            </motion.div>
+            <motion.div
+              className="absolute bottom-[6%] right-[5%] w-40 h-56 md:w-68 md:h-88 rounded-lg overflow-hidden shadow-xl"
+              initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
+              animate={{ opacity: 1, scale: 1, rotate: -5 }}
+              transition={{ delay: 4.3, duration: 1.0 }}
+            >
+              <img src="/photo-9.jpg" alt="Sofia & Zé Francisco" className="w-full h-full object-cover" />
             </motion.div>
 
             {/* Couple names tease */}
@@ -180,7 +204,7 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
               className="absolute bottom-8 text-[#5D8AA8]/60 text-lg tracking-[0.3em] uppercase font-light"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 2.2, duration: 0.8 }}
+              transition={{ delay: 4.5, duration: 1.0 }}
             >
               Sofia & Zé Francisco
             </motion.p>
