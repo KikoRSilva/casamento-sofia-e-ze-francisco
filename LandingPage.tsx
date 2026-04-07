@@ -885,43 +885,6 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
         </div>
       </section>
 
-      {/* ───── FAQ ───── */}
-      <section className="py-24 md:py-32 px-6 bg-white/50">
-        <div className="max-w-2xl mx-auto">
-          <SectionHeading>Perguntas Frequentes</SectionHeading>
-          <div className="space-y-4">
-            {[
-              {
-                q: 'A que horas devo chegar?',
-                a: 'Pedimos que cheguem pelo menos 20 a 30 minutos antes da cerimónia, que começa às 15h00. Assim garantimos que tudo começa a horas!',
-              },
-              {
-                q: 'Posso tirar fotos e filmar durante a cerimónia?',
-                a: 'Sim, podem fotografar e filmar à vontade durante toda a cerimónia e receção. Partilhem os momentos com a hashtag dos noivos!',
-              },
-              {
-                q: 'Há estacionamento disponível?',
-                a: 'Sim, existe estacionamento disponível junto a ambos os locais — na igreja em Arruda dos Vinhos e no espaço da receção em Marinhais.',
-              },
-              {
-                q: 'O que acontece entre a cerimónia e a receção?',
-                a: 'A cerimónia termina por volta das 16h30 e a receção começa às 19h00 em Marinhais. Aproveitem para conviver e descansar antes da festa!',
-              },
-              {
-                q: 'Podem crianças participar?',
-                a: 'O casamento é um evento para adultos. Agradecemos a vossa compreensão e aproveitem a noite!',
-              },
-            ].map((item, i) => (
-              <Reveal key={i} delay={i * 0.08}>
-                <div className="bg-white rounded-2xl px-6 py-5 shadow-sm border border-stone-100">
-                  <p className="font-semibold text-stone-700 mb-2">{item.q}</p>
-                  <p className="text-stone-500 leading-relaxed text-sm">{item.a}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ───── FOOTER ───── */}
       <footer className="py-12 text-center border-t border-stone-200">
