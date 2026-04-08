@@ -6,7 +6,7 @@ import {
   useTransform,
   useInView,
 } from 'framer-motion';
-import { ChevronDown, MapPin, Gift, Church, PartyPopper, Wine, UtensilsCrossed } from 'lucide-react';
+import { ChevronDown, MapPin, Gift, Phone } from 'lucide-react';
 
 /* ─────────────────────────────────────────────
    Photo Album Intro Component
@@ -161,8 +161,14 @@ function PhotoAlbum() {
       <div className="absolute -bottom-4 left-4 right-4 h-8 bg-black/15 rounded-full blur-xl" />
 
       {/* Back cover (static) */}
-      <div className={`absolute inset-0 ${frontRadius} bg-gradient-to-br from-[#5D8AA8] to-[#3E6B8A] shadow-xl`}>
+      <div className={`absolute inset-0 ${frontRadius} bg-gradient-to-br from-[#5D8AA8] to-[#3E6B8A] shadow-xl flex items-center justify-center`}>
         <div className={`absolute inset-2 ${coverBorderInner} border border-[#8BB8D4]/30`} />
+        <motion.p
+          className="relative z-10 serif text-[#f5f0e8]/70 text-3xl md:text-5xl italic"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: COVER_OPEN_DELAY + PAGE_FLIP_DURATION + (pages.length - 1) * PAGE_FLIP_DELAY + PAGE_FLIP_DURATION, duration: 0.8 }}
+        >bem-vindos</motion.p>
       </div>
 
       {/* Album pages */}
@@ -209,11 +215,8 @@ function PhotoAlbum() {
         <div
           className={`absolute inset-0 ${backRadius} bg-[#f5f0e8]`}
           style={{ backfaceVisibility: 'hidden', transform: backTransform }}
-        >
-          <div className="w-full h-full flex items-center justify-center">
-            <p className="text-[#5D8AA8]/30 serif text-xl md:text-2xl italic">bem-vindos</p>
-          </div>
-        </div>
+        />
+
       </motion.div>
     </div>
   );
@@ -260,6 +263,64 @@ function SectionHeading({ children, light = false }: { children: React.ReactNode
   );
 }
 
+function ContactDropdown({ phone, label }: { phone: string; label: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const intl = `351${phone.replace(/\s/g, '')}`;
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  return (
+    <div className="relative inline-block" ref={ref}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="text-[#5D8AA8] text-sm hover:underline cursor-pointer"
+      >
+        {label}
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15 }}
+            className="absolute left-1/2 -translate-x-1/2 mt-2 bg-white rounded-xl shadow-lg border border-stone-100 overflow-hidden z-50 min-w-[160px]"
+          >
+            <a
+              href={`tel:${phone.replace(/\s/g, '')}`}
+              className="flex items-center gap-3 px-4 py-3 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
+              onClick={() => setOpen(false)}
+            >
+              <Phone size={15} className="text-[#5D8AA8]" />
+              Ligar
+            </a>
+            <a
+              href={`https://wa.me/${intl}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-4 py-3 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
+              onClick={() => setOpen(false)}
+            >
+              <svg viewBox="0 0 24 24" className="w-[15px] h-[15px] fill-[#25D366]">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+              </svg>
+              WhatsApp
+            </a>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 /* ─────────────────────────────────────────────
    Countdown hook
    ───────────────────────────────────────────── */
@@ -289,6 +350,7 @@ function useCountdown() {
 const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) => {
   const [introDone, setIntroDone] = useState(skipIntro);
   const [showNav, setShowNav] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const countdown = useCountdown();
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll();
@@ -364,23 +426,84 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 md:px-10 py-4 backdrop-blur-sm bg-[#FCFBF7]/60"
+            className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm bg-[#FCFBF7]/60"
           >
-            <button
-              onClick={() => scrollTo('mapa')}
-              className="text-sm tracking-[0.2em] uppercase text-stone-600 hover:text-[#5D8AA8] transition-colors font-light flex items-center gap-1.5"
-            >
-              <MapPin size={14} />
-              Mapa
-            </button>
-            <button
-              onClick={() => scrollTo('presentes')}
-              className="text-sm tracking-[0.2em] uppercase text-stone-600 hover:text-[#5D8AA8] transition-colors font-light flex items-center gap-1.5"
-            >
-              <Gift size={14} />
-              Presentes
-            </button>
+            {/* Desktop nav */}
+            <div className="hidden md:flex items-center justify-center gap-10 px-10 py-4">
+              {([
+                { id: 'o-dia', label: 'O Dia' },
+                { id: 'mapa', label: 'Igreja' },
+                { id: 'jantar', label: 'Jantar' },
+                { id: 'presentes', label: 'Lista de Presentes' },
+              ] as const).map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => scrollTo(item.id)}
+                  className="text-xs tracking-[0.25em] uppercase text-stone-500 hover:text-[#5D8AA8] transition-colors font-light"
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Mobile: burger */}
+            <div className="md:hidden flex items-center justify-between px-6 py-4">
+              <p className="serif text-[#5D8AA8] text-sm tracking-wide">S&ZF</p>
+              <button
+                onClick={() => setMenuOpen((v) => !v)}
+                className="relative w-6 h-4 flex flex-col justify-between"
+                aria-label="Menu"
+              >
+                <motion.span
+                  animate={menuOpen ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="block w-full h-[1.5px] bg-stone-500 origin-center"
+                />
+                <motion.span
+                  animate={menuOpen ? { opacity: 0, scaleX: 0 } : { opacity: 1, scaleX: 1 }}
+                  transition={{ duration: 0.2 }}
+                  className="block w-full h-[1.5px] bg-stone-500"
+                />
+                <motion.span
+                  animate={menuOpen ? { rotate: -45, y: -7 } : { rotate: 0, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="block w-full h-[1.5px] bg-stone-500 origin-center"
+                />
+              </button>
+            </div>
           </motion.nav>
+        )}
+      </AnimatePresence>
+
+      {/* ───── MOBILE MENU OVERLAY ───── */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-40 backdrop-blur-md bg-[#FCFBF7]/95 flex flex-col items-center justify-center gap-8"
+          >
+            {([
+              { id: 'o-dia', label: 'O Dia' },
+              { id: 'mapa', label: 'Igreja' },
+              { id: 'jantar', label: 'Jantar' },
+              { id: 'presentes', label: 'Lista de Presentes' },
+            ] as const).map((item, i) => (
+              <motion.button
+                key={item.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ delay: i * 0.08, duration: 0.3 }}
+                onClick={() => { setMenuOpen(false); scrollTo(item.id); }}
+                className="serif text-2xl text-stone-600 hover:text-[#5D8AA8] transition-colors tracking-wide"
+              >
+                {item.label}
+              </motion.button>
+            ))}
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -443,8 +566,39 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
         </motion.div>
       </section>
 
+      {/* ───── WELCOME MESSAGE ───── */}
+      <section className="pt-10 md:pt-14 pb-6 md:pb-8 px-6 overflow-hidden">
+        <div className="max-w-2xl mx-auto text-center">
+          <Reveal>
+            <p className="serif text-[#5D8AA8] text-xl md:text-2xl italic leading-relaxed mb-6">
+              Queridos amigos, tios e família,
+            </p>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <p className="serif text-[#5D8AA8] text-2xl md:text-3xl font-semibold mb-8">
+              Bem-vindos ao nosso dia!
+            </p>
+          </Reveal>
+          <Reveal delay={0.2}>
+            <p className="text-stone-600 text-base md:text-lg leading-relaxed mb-4">
+              Estamos muito felizes por partilhar este momento especial convosco.
+            </p>
+          </Reveal>
+          <Reveal delay={0.3}>
+            <p className="text-stone-600 text-base md:text-lg leading-relaxed mb-4">
+              Aqui encontrarão todas as informações sobre a celebração, o dress code e os detalhes para o grande dia.
+            </p>
+          </Reveal>
+          <Reveal delay={0.4}>
+            <p className="text-stone-600 text-base md:text-lg leading-relaxed">
+              Mal podemos esperar para vos ver e celebrar juntos esta nossa aventura!
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
       {/* ───── COUNTDOWN ───── */}
-      <section className="py-20 md:py-28 px-6 overflow-hidden">
+      <section className="pt-6 md:pt-8 pb-20 md:pb-28 px-6 overflow-hidden">
         <div className="max-w-4xl mx-auto">
 
           {/* Top rule */}
@@ -513,94 +667,41 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
       </section>
 
       {/* ───── O DIA (TIMELINE) ───── */}
-      <section className="py-24 md:py-32 px-6 bg-white/50 overflow-hidden">
+      <section id="o-dia" className="py-24 md:py-32 px-6 bg-white/50 overflow-hidden">
         <div className="max-w-4xl mx-auto">
           <SectionHeading>O Dia</SectionHeading>
 
-          {/* Horizontal timeline */}
-          <div className="relative flex items-start justify-between px-4 md:px-12">
-
-            {/* Swirl connectors between icons */}
-            <svg
-              className="absolute left-0 right-0 w-full pointer-events-none z-0"
-              style={{ top: 20, height: 50 }}
-              viewBox="0 0 800 50"
-              fill="none"
-            >
-              {[0, 1, 2].map((seg) => {
-                // Each icon center is at 100, 300, 500, 700 in an 800-wide viewBox
-                const x1 = seg * 200 + 130;
-                const x2 = (seg + 1) * 200 + 70;
-                const span = x2 - x1;
-                const lx1 = x1 + span * 0.33;
-                const lx2 = x1 + span * 0.67;
-                const r = 5;
-                return (
-                  <path
-                    key={seg}
-                    d={[
-                      `M${x1},28`,
-                      `Q${(x1 + lx1) / 2},46 ${lx1},28`,
-                      `a${r},${r} 0 1,0 0.01,0`,
-                      `Q${(lx1 + lx2) / 2},46 ${lx2},28`,
-                      `a${r},${r} 0 1,0 0.01,0`,
-                      `Q${(lx2 + x2) / 2},46 ${x2},28`,
-                    ].join(' ')}
-                    stroke="#5D8AA8"
-                    strokeOpacity={0.3}
-                    strokeWidth={0.8}
-                    strokeLinecap="round"
-                    fill="none"
-                  />
-                );
-              })}
-            </svg>
-
-            {([
-              {
-                time: '16:00',
-                title: 'Cerimónia',
-                icon: <Church size={52} className="md:hidden" />,
-                iconLg: <Church size={72} className="hidden md:block" />,
-              },
-              {
-                time: '18:30',
-                title: 'Cocktails',
-                icon: <Wine size={52} className="md:hidden" />,
-                iconLg: <Wine size={72} className="hidden md:block" />,
-              },
-              {
-                time: '20:30',
-                title: 'Jantar',
-                icon: <UtensilsCrossed size={52} className="md:hidden" />,
-                iconLg: <UtensilsCrossed size={72} className="hidden md:block" />,
-              },
-              {
-                time: '23:00',
-                title: 'Festa',
-                icon: <PartyPopper size={52} className="md:hidden" />,
-                iconLg: <PartyPopper size={72} className="hidden md:block" />,
-              },
-            ] as const).map((event, i) => (
-              <Reveal key={i} delay={i * 0.15} className="flex flex-col items-center text-center flex-1 relative z-10">
-                {/* Icon */}
-                <div className="text-[#5D8AA8]">
-                  {event.icon}
-                  {event.iconLg}
-                </div>
-                {/* Time */}
-                <span className="mt-3 text-[#5D8AA8] font-bold text-lg md:text-xl serif tabular-nums">
-                  {event.time}
-                </span>
-                {/* Title */}
-                <span className="mt-1 text-stone-700 text-xs md:text-sm font-medium tracking-wide">
-                  {event.title}
-                </span>
-              </Reveal>
-            ))}
-          </div>
+          {/* Timeline illustration */}
+          <Reveal>
+            <div className="flex justify-center">
+              <img
+                src="/icons.png"
+                alt="Church 16:00 · Toast 18:30 · Dinner 20:30 · Dance 23:00"
+                className="w-full max-w-3xl mix-blend-multiply pointer-events-none select-none"
+              />
+            </div>
+          </Reveal>
         </div>
       </section>
+
+      {/* ───── DRESS CODE (nota) ───── */}
+      <Reveal>
+        <div className="max-w-lg mx-auto px-8 py-10 text-center">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-[#5D8AA8]/30" />
+            <p className="serif text-[#5D8AA8] text-sm md:text-base tracking-[0.3em] uppercase">Dress Code</p>
+            <div className="h-px flex-1 bg-gradient-to-l from-transparent to-[#5D8AA8]/30" />
+          </div>
+          <p className="serif text-stone-700 text-lg md:text-xl leading-loose">
+            Cavalheiros: <span className="font-semibold">Fato e gravata</span><br />
+            Ladies: <span className="font-semibold">Vestido elegante</span>
+          </p>
+          <div className="w-12 h-px bg-[#5D8AA8]/20 mx-auto my-5" />
+          <p className="text-stone-400 text-sm md:text-base italic leading-relaxed">
+            A vossa presença é o mais importante, mas adorávamos ver todos a rigor connosco.
+          </p>
+        </div>
+      </Reveal>
 
       {/* ───── IGREJA ───── */}
       <section id="mapa" className="py-24 md:py-32 px-6">
@@ -609,9 +710,13 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
 
           {/* Image + Map side by side */}
           <Reveal>
-            <div className="grid md:grid-cols-2 gap-6 md:gap-10 items-stretch">
-              {/* Church image */}
-              <div className="relative rounded-2xl overflow-hidden border border-stone-100 bg-white shadow-sm">
+            <div className="grid md:grid-cols-2 gap-6 md:gap-10">
+              {/* Left column: text + image */}
+              <div className="flex flex-col">
+                <p className="text-stone-600 text-base md:text-lg leading-relaxed text-center mb-4">
+                  A missa de celebração do matrimónio terá início às 16:00 (confiando na pontualidade da noiva). Aconselhamos que cheguem cerca de 20 minutos mais cedo.
+                </p>
+                <div className="relative rounded-2xl overflow-hidden border border-stone-100 bg-white shadow-sm flex-1">
                 <img
                   src="/igreja-pastel.png"
                   alt="Igreja de Nossa Senhora da Salvação"
@@ -624,27 +729,42 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
                   <p className="text-white/80 text-sm mt-1 drop-shadow-md">Arruda dos Vinhos</p>
                 </div>
               </div>
-              {/* Map */}
-              <div className="rounded-2xl overflow-hidden border border-stone-100 bg-white shadow-sm flex flex-col">
-                <div className="flex-1 min-h-[280px] md:min-h-0 bg-stone-100">
-                  <iframe
-                    title="Igreja de Nossa Senhora da Salvação"
-                    src="https://www.google.com/maps?q=Igreja+de+Nossa+Senhora+da+Salvação+Arruda+dos+Vinhos&output=embed"
-                    className="w-full h-full border-0"
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                </div>
-                <div className="p-4 text-center">
-                  <a
-                    href="https://www.google.com/maps/search/?api=1&query=Igreja+de+Nossa+Senhora+da+Salvação+Arruda+dos+Vinhos"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#5D8AA8] text-white rounded-lg font-medium text-sm shadow-sm hover:bg-[#4A6E86] hover:scale-105 transition-all duration-300"
-                  >
-                    <MapPin size={16} />
-                    Como Chegar
-                  </a>
+              {/* Mobile: button only */}
+              <div className="md:hidden flex justify-center mt-4">
+                <a
+                  href="https://www.google.com/maps/search/?api=1&query=Igreja+de+Nossa+Senhora+da+Salvação+Arruda+dos+Vinhos"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#5D8AA8] text-white rounded-lg font-medium text-sm shadow-sm hover:bg-[#4A6E86] hover:scale-105 transition-all duration-300"
+                >
+                  <MapPin size={16} />
+                  Como Chegar
+                </a>
+              </div>
+              </div>
+              {/* Right column: map (desktop only) */}
+              <div className="hidden md:flex flex-col">
+                <div className="rounded-2xl overflow-hidden border border-stone-100 bg-white shadow-sm flex flex-col flex-1">
+                  <div className="flex-1 bg-stone-100">
+                    <iframe
+                      title="Igreja de Nossa Senhora da Salvação"
+                      src="https://www.google.com/maps?q=Igreja+de+Nossa+Senhora+da+Salvação+Arruda+dos+Vinhos&output=embed"
+                      className="w-full h-full border-0"
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                  </div>
+                  <div className="p-4 text-center">
+                    <a
+                      href="https://www.google.com/maps/search/?api=1&query=Igreja+de+Nossa+Senhora+da+Salvação+Arruda+dos+Vinhos"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#5D8AA8] text-white rounded-lg font-medium text-sm shadow-sm hover:bg-[#4A6E86] hover:scale-105 transition-all duration-300"
+                    >
+                      <MapPin size={16} />
+                      Como Chegar
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -685,43 +805,66 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
       </section>
 
       {/* ───── QUINTA DA SARDINHA ───── */}
-      <section className="py-24 md:py-32 px-6 bg-[#5D8AA8] text-white">
+      <section id="jantar" className="py-24 md:py-32 px-6 bg-[#5D8AA8] text-white">
         <div className="max-w-5xl mx-auto">
           <SectionHeading light>Cocktail e Jantar</SectionHeading>
 
           <Reveal>
-            <div className="grid md:grid-cols-2 gap-6 md:gap-10 items-stretch">
-              {/* Quinta image */}
-              <div className="relative rounded-2xl overflow-hidden border border-stone-100 bg-white shadow-sm">
-                <img
-                  src="/quinta-pastel.png"
-                  alt="Quinta da Sardinha"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/50 to-transparent pt-10 pb-4 px-4 text-center">
-                  <h3 className="text-white text-lg md:text-xl font-bold serif drop-shadow-md">
-                    Quinta da Sardinha
-                  </h3>
-                  <p className="text-white/80 text-sm mt-1 drop-shadow-md">Marinhais</p>
+            <div className="grid md:grid-cols-2 gap-6 md:gap-10">
+              {/* Left column: text + image */}
+              <div className="flex flex-col">
+                <p className="text-white/80 text-base md:text-lg leading-relaxed text-center mb-4">
+                  O cocktail começa às 18:30. À chegada à quinta, sigam as indicações da sinalética até ao parque de estacionamento.
+                </p>
+                <div className="relative rounded-2xl overflow-hidden border border-stone-100 bg-white shadow-sm flex-1">
+                  <img
+                    src="/quinta-pastel.png"
+                    alt="Quinta da Sardinha"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/50 to-transparent pt-10 pb-4 px-4 text-center">
+                    <h3 className="text-white text-lg md:text-xl font-bold serif drop-shadow-md">
+                      Quinta da Sardinha
+                    </h3>
+                    <p className="text-white/80 text-sm mt-1 drop-shadow-md">Marinhais</p>
+                  </div>
                 </div>
               </div>
-              {/* Map */}
-              <div className="rounded-2xl overflow-hidden border border-stone-100 bg-white shadow-sm flex flex-col">
-                <div className="flex-1 min-h-[280px] md:min-h-0 bg-stone-100">
-                  <iframe
-                    title="Quinta da Sardinha"
-                    src="https://www.google.com/maps?q=Quinta+da+Sardinha+Marinhais&output=embed"
-                    className="w-full h-full border-0"
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
+              {/* Right column: text + map */}
+              <div className="flex flex-col">
+                <p className="text-white/80 text-base md:text-lg leading-relaxed text-center mb-4">
+                  Caso utilizem a App - Waze, coloquem por favor como destino final: <em className="italic">Rua Particular da Quinta da Sardinha - Marinhais</em>
+                </p>
+                {/* Desktop: map */}
+                <div className="hidden md:flex rounded-2xl overflow-hidden border border-stone-100 bg-white shadow-sm flex-col flex-1">
+                  <div className="flex-1 bg-stone-100">
+                    <iframe
+                      title="Quinta da Sardinha"
+                      src="https://www.google.com/maps?q=39.0485206,-8.7195753&output=embed"
+                      className="w-full h-full border-0"
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                  </div>
+                  <div className="p-4 text-center">
+                    <a
+                      href="https://www.google.com/maps/search/?api=1&query=39.0485206,-8.7195753"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-[#5D8AA8] rounded-lg font-medium text-sm shadow-sm hover:bg-white/90 hover:scale-105 transition-all duration-300"
+                    >
+                      <MapPin size={16} />
+                      Como Chegar
+                    </a>
+                  </div>
                 </div>
-                <div className="p-4 text-center">
+                {/* Mobile: button only */}
+                <div className="md:hidden flex justify-center mt-2">
                   <a
-                    href="https://www.google.com/maps/search/?api=1&query=Quinta+da+Sardinha+Marinhais"
+                    href="https://www.google.com/maps/search/?api=1&query=39.0485206,-8.7195753"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#5D8AA8] text-white rounded-lg font-medium text-sm shadow-sm hover:bg-[#4A6E86] hover:scale-105 transition-all duration-300"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-[#5D8AA8] rounded-lg font-medium text-sm shadow-sm hover:bg-white/90 hover:scale-105 transition-all duration-300"
                   >
                     <MapPin size={16} />
                     Como Chegar
@@ -738,9 +881,9 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
       <section className="py-16 md:py-20 px-6 bg-[#E8E0D4]">
         <div className="max-w-xl mx-auto text-center">
           <Reveal>
-            <p className="text-2xl mb-3">⚠️</p>
+            <p className="text-4xl md:text-5xl mb-3">⚠️</p>
             <p className="text-stone-700 font-semibold text-base md:text-lg leading-relaxed">
-              Neste dia estarão a decorrer as festas da Sardinha Assada, em Benavente, e a estrada EN118 em direção à quinta estará cortada até perto das 21h.
+              Alertamos que, devido às Festas da Sardinha Assada, a estrada EN-118, no interior de Benavente, estará cortada.
             </p>
             <p className="text-stone-500 text-sm mt-4 mb-5">Rota alternativa sugerida:</p>
             <a
@@ -760,6 +903,33 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
       </section>
 
       {/* ───── ACCOMMODATION ───── */}
+      {/* ───── DRIVERS ───── */}
+      <Reveal>
+        <div className="max-w-lg mx-auto px-8 py-10 text-center">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-[#5D8AA8]/30" />
+            <p className="serif text-[#5D8AA8] text-sm md:text-base tracking-[0.3em] uppercase">Drivers</p>
+            <div className="h-px flex-1 bg-gradient-to-l from-transparent to-[#5D8AA8]/30" />
+          </div>
+          <div className="flex flex-col md:flex-row justify-center gap-6 md:gap-12 mb-6">
+            <div>
+              <p className="text-stone-400 text-xs tracking-widest uppercase mb-1">Opc. 1</p>
+              <p className="serif text-stone-700 text-base md:text-lg font-semibold">Bernardo Neto</p>
+              <ContactDropdown phone="916 815 927" label="916 815 927" />
+            </div>
+            <div>
+              <p className="text-stone-400 text-xs tracking-widest uppercase mb-1">Opc. 2</p>
+              <p className="serif text-stone-700 text-base md:text-lg font-semibold">Manuel Maria Maio</p>
+              <ContactDropdown phone="911 110 911" label="911 110 911" />
+            </div>
+          </div>
+          <div className="w-12 h-px bg-[#5D8AA8]/20 mx-auto my-5" />
+          <p className="text-stone-400 text-sm md:text-base italic leading-relaxed max-w-md mx-auto">
+            É possível organizar drivers de acordo com os carros necessários. Quem precisar, pode enviar uma mensagem e a coordenação será feita diretamente com cada pessoa.
+          </p>
+        </div>
+      </Reveal>
+
       <section className="py-24 md:py-32 px-6 bg-white/50">
         <div className="max-w-5xl mx-auto">
           <SectionHeading>Alojamento</SectionHeading>
@@ -849,38 +1019,53 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
         </div>
       </section>
 
-      {/* ───── DRESS CODE ───── */}
-      <section className="py-24 md:py-32 px-6 bg-white/50">
-        <div className="max-w-3xl mx-auto text-center">
-          <SectionHeading>Dress Code</SectionHeading>
-          <Reveal>
-            <p className="text-2xl md:text-3xl serif text-stone-700 mb-4">Formal e Elegante</p>
-            <p className="text-stone-500 leading-relaxed max-w-lg mx-auto">
-              Queremos os nossos familiares e amigos no seu melhor para celebrar connosco este dia especial.
-            </p>
-          </Reveal>
-        </div>
-      </section>
 
       {/* ───── GIFTS ───── */}
-      <section id="presentes" className="py-24 md:py-32 px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <SectionHeading>Lista de Presentes</SectionHeading>
+      <section id="presentes" className="relative py-24 md:py-32 px-6 bg-gradient-to-b from-[#5D8AA8] to-[#4A7A9B] overflow-hidden">
+        {/* Decorative background elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-white/[0.03] blur-3xl" />
+          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-white/[0.02] blur-2xl" />
+        </div>
+
+        <div className="relative max-w-3xl mx-auto text-center">
           <Reveal>
-            <p className="text-stone-500 leading-relaxed mb-8 max-w-lg mx-auto">
-              A vossa presença é o maior presente que nos podem dar.
-              Mas se quiserem contribuir para a nossa nova vida a dois,
-              ficaremos muito gratos.
+            <Gift size={32} className="text-white/30 mx-auto mb-6" />
+          </Reveal>
+          <SectionHeading light>Lista de Presentes</SectionHeading>
+
+          <Reveal>
+            <p className="serif text-white/90 text-lg md:text-xl leading-relaxed mb-4 max-w-xl mx-auto">
+              A vossa presença no nosso dia é o que mais desejamos e nos deixa mais felizes.
             </p>
-            <a
-              href="https://revolut.me/franciuk7d"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-[#5D8AA8] text-white rounded-xl font-medium shadow-md hover:bg-[#4A6E86] hover:scale-105 transition-all duration-300"
-            >
-              <Gift size={18} />
-              Contribuir via Revolut
-            </a>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <p className="text-white/70 leading-relaxed mb-10 max-w-xl mx-auto">
+              Se quiserem deixar-nos uma lembrança, podem ajudar-nos neste novo passo das nossas vidas. Estamos a começar a preparar a nossa primeira casa e, abaixo, listamos alguns itens meramente ilustrativos que poderão ser úteis a quem quiser contribuir. Alternativamente, podem também participar na nossa lua-de-mel.
+            </p>
+          </Reveal>
+
+          <Reveal delay={0.2}>
+            <div className="flex justify-center mb-10">
+              <div className="backdrop-blur-sm bg-white/[0.08] border border-white/[0.12] rounded-2xl px-8 py-5">
+                <p className="text-white/90 font-medium text-sm md:text-base mb-3">Sofia Silva e José Francisco Pereira</p>
+                <div className="flex flex-col gap-1">
+                  <p className="text-white/40 text-[10px] tracking-[0.3em] uppercase">IBAN</p>
+                  <p className="text-white font-medium text-sm md:text-base tracking-wide">PT50 0033 0000 4583 1457 1540 5</p>
+                </div>
+                <div className="flex flex-col gap-1 mt-3">
+                  <p className="text-white/40 text-[10px] tracking-[0.3em] uppercase">BIC/SWIFT</p>
+                  <p className="text-white font-medium text-sm md:text-base tracking-wide">BCOMPTPL</p>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+
+          <Reveal delay={0.3}>
+            <div className="w-16 h-px bg-white/20 mx-auto mb-6" />
+            <p className="serif text-white/50 italic text-base md:text-lg">
+              Obrigado por fazerem parte deste momento tão especial! 🌟
+            </p>
           </Reveal>
         </div>
       </section>
@@ -890,7 +1075,7 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
       <footer className="py-12 text-center border-t border-stone-200">
         <p className="serif text-xl text-[#5D8AA8] mb-2">Sofia & Zé Francisco</p>
         <p className="text-stone-400 text-sm tracking-wider">27 . 06 . 2026</p>
-        <p className="text-stone-300 text-xs mt-4">Feito com amor</p>
+        <p className="text-stone-300 text-xs mt-4">Vamos de boda 🪩</p>
       </footer>
     </div>
   );
