@@ -1041,7 +1041,9 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
           </Reveal>
           <Reveal delay={0.1}>
             <p className="text-white/70 leading-relaxed mb-10 max-w-xl mx-auto">
-              Se quiserem deixar-nos uma lembrança, podem ajudar-nos neste novo passo das nossas vidas. Estamos a começar a preparar a nossa primeira casa e, abaixo, listamos alguns itens meramente ilustrativos que poderão ser úteis a quem quiser contribuir. Alternativamente, podem também participar na nossa lua-de-mel.
+              Estamos a preparar a nossa primeira casa, caso queiram ajudar-nos a torná-la mais acolhedora para vos podermos receber, listamos alguns itens ilustrativos do que iremos comprar.
+              <br /><br />
+              Poderão contribuir com o valor que desejarem através dos nossos dados bancários.
             </p>
           </Reveal>
 
