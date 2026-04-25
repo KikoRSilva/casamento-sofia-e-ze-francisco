@@ -723,10 +723,10 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/50 to-transparent pt-10 pb-4 px-4 text-center">
-                  <h3 className="text-white text-lg md:text-xl font-bold serif drop-shadow-md">
+                  <h3 className="text-white text-base md:text-xl font-bold serif drop-shadow-md">
                     Igreja de Nossa Senhora da Salvação
                   </h3>
-                  <p className="text-white/80 text-sm mt-1 drop-shadow-md">Arruda dos Vinhos</p>
+                  <p className="text-white/80 text-xs md:text-sm mt-1 drop-shadow-md">Arruda dos Vinhos</p>
                 </div>
               </div>
               {/* Mobile: button only */}
@@ -879,7 +879,7 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
 
       {/* ───── ROTA ALTERNATIVA ───── */}
       <section className="py-16 md:py-20 px-6 bg-[#E8E0D4]">
-        <div className="max-w-xl mx-auto text-center">
+        <div className="max-w-xl md:max-w-3xl mx-auto text-center">
           <Reveal>
             <p className="text-4xl md:text-5xl mb-3">⚠️</p>
             <p className="text-stone-700 font-semibold text-base md:text-lg leading-relaxed">
@@ -895,7 +895,7 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
               <img
                 src="/mapa-alternativa.png"
                 alt="Mapa com rota alternativa para a Quinta da Sardinha"
-                className="w-64 h-auto group-hover:scale-[1.02] transition-transform duration-500"
+                className="w-64 md:w-[28rem] lg:w-[32rem] h-auto mx-auto group-hover:scale-[1.02] transition-transform duration-500"
               />
             </a>
           </Reveal>
