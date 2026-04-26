@@ -1069,9 +1069,31 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
               </p>
             </Reveal>
             <Reveal delay={0.1}>
-              <p className="text-white/70 leading-relaxed mb-12 max-w-xl mx-auto">
+              <p className="text-white/70 leading-relaxed mb-10 max-w-xl mx-auto">
                 Estamos a preparar a nossa primeira casa, caso queiram ajudar-nos a torná-la mais acolhedora para vos podermos receber, listamos alguns itens ilustrativos do que iremos comprar.
               </p>
+            </Reveal>
+
+            <Reveal delay={0.15}>
+              <p className="text-white/70 leading-relaxed mb-10 max-w-xl mx-auto">
+                Poderão contribuir com o valor que desejarem através dos nossos dados bancários.
+              </p>
+            </Reveal>
+
+            <Reveal delay={0.2}>
+              <div className="flex justify-center mb-14">
+                <div className="backdrop-blur-sm bg-white/[0.08] border border-white/[0.12] rounded-2xl px-8 py-5">
+                  <p className="text-white/90 font-medium text-sm md:text-base mb-3">Sofia Silva e José Francisco Pereira</p>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-white/40 text-[10px] tracking-[0.3em] uppercase">IBAN</p>
+                    <p className="text-white font-medium text-sm md:text-base tracking-wide">PT50 0033 0000 4583 1457 1540 5</p>
+                  </div>
+                  <div className="flex flex-col gap-1 mt-3">
+                    <p className="text-white/40 text-[10px] tracking-[0.3em] uppercase">BIC/SWIFT</p>
+                    <p className="text-white font-medium text-sm md:text-base tracking-wide">BCOMPTPL</p>
+                  </div>
+                </div>
+              </div>
             </Reveal>
           </div>
 
@@ -1099,28 +1121,6 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
           </div>
 
           <div className="max-w-3xl mx-auto text-center">
-            <Reveal delay={0.1}>
-              <p className="text-white/70 leading-relaxed mb-10 max-w-xl mx-auto">
-                Poderão contribuir com o valor que desejarem através dos nossos dados bancários.
-              </p>
-            </Reveal>
-
-            <Reveal delay={0.2}>
-              <div className="flex justify-center mb-10">
-                <div className="backdrop-blur-sm bg-white/[0.08] border border-white/[0.12] rounded-2xl px-8 py-5">
-                  <p className="text-white/90 font-medium text-sm md:text-base mb-3">Sofia Silva e José Francisco Pereira</p>
-                  <div className="flex flex-col gap-1">
-                    <p className="text-white/40 text-[10px] tracking-[0.3em] uppercase">IBAN</p>
-                    <p className="text-white font-medium text-sm md:text-base tracking-wide">PT50 0033 0000 4583 1457 1540 5</p>
-                  </div>
-                  <div className="flex flex-col gap-1 mt-3">
-                    <p className="text-white/40 text-[10px] tracking-[0.3em] uppercase">BIC/SWIFT</p>
-                    <p className="text-white font-medium text-sm md:text-base tracking-wide">BCOMPTPL</p>
-                  </div>
-                </div>
-              </div>
-            </Reveal>
-
             <Reveal delay={0.3}>
               <div className="w-16 h-px bg-white/20 mx-auto mb-6" />
               <p className="serif text-white/50 italic text-base md:text-lg">
