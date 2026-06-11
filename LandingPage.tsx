@@ -17,20 +17,20 @@ const ALBUM_PHOTOS = [
   '/photo-7.jpg', '/photo-8.jpg', '/photo-9.jpg',
 ];
 
-const GIFTS: { name: string; image: string }[] = [
+const GIFTS: { name: string; image: string; offered?: boolean }[] = [
   { name: 'Móvel de Olmo para entrada', image: '/gifts/gift-01.jpeg' },
   { name: 'Mesa de Centro Quadrada de Olmo', image: '/gifts/gift-02.jpeg' },
   { name: 'Sofá Modular 3 peças', image: '/gifts/gift-03.png' },
   { name: 'Pack 2 Bancos de Cozinha em vime sintético Ori', image: '/gifts/gift-04.png' },
-  { name: 'Mesa de Jantar oval extensível 160-200x100 cm', image: '/gifts/gift-05.png' },
+  { name: 'Mesa de Jantar oval extensível 160-200x100 cm', image: '/gifts/gift-05.png', offered: true },
   { name: 'Pack 6 Cadeiras Mesa de Jantar', image: '/gifts/gift-06.png' },
   { name: 'Móvel TV 160x40 cm com prateleira em madeira de acácia', image: '/gifts/gift-07.png' },
   { name: 'Mesa de Jardim retangular extensível em madeira de acácia', image: '/gifts/gift-08.png' },
   { name: 'Pack de 4 Cadeiras de Mesa de Jardim com braços em madeira de acácia', image: '/gifts/gift-09.png' },
   { name: 'Torradeira SMEG Verde água', image: '/gifts/gift-10.png' },
-  { name: 'Chaleira SMEG Verde água', image: '/gifts/gift-11.png' },
+  { name: 'Chaleira SMEG Verde água', image: '/gifts/gift-11.png', offered: true },
   { name: 'Liquidificadora SMEG Verde água', image: '/gifts/gift-12.png' },
-  { name: 'Aspirador Vertical Dyson V10', image: '/gifts/gift-13.jpeg' },
+  { name: 'Aspirador Vertical Dyson V10', image: '/gifts/gift-13.jpeg', offered: true },
   { name: 'Televisão Samsung 75”', image: '/gifts/gift-14.png' },
   { name: 'Bimby TM7', image: '/gifts/gift-15.jpeg' },
   { name: 'Cama de Casal Estofada Shiraz com Baú Rebatível', image: '/gifts/gift-16.png' },
@@ -958,6 +958,102 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
         </div>
       </Reveal>
 
+      {/* ───── GIFTS ───── */}
+      <section id="presentes" className="relative py-24 md:py-32 px-6 bg-gradient-to-b from-[#5D8AA8] to-[#4A7A9B] overflow-hidden">
+        {/* Decorative background elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-white/[0.03] blur-3xl" />
+          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-white/[0.02] blur-2xl" />
+        </div>
+
+        <div className="relative">
+          <div className="max-w-3xl mx-auto text-center">
+            <Reveal>
+              <Gift size={32} className="text-white/30 mx-auto mb-6" />
+            </Reveal>
+            <SectionHeading light>Lista de Presentes</SectionHeading>
+
+            <Reveal>
+              <p className="serif text-white/90 text-lg md:text-xl leading-relaxed mb-4 max-w-xl mx-auto">
+                A vossa presença no nosso dia é o que mais desejamos e nos deixa mais felizes.
+              </p>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <p className="text-white/70 leading-relaxed mb-10 max-w-xl mx-auto">
+                Estamos a preparar a nossa primeira casa, caso queiram ajudar-nos a torná-la mais acolhedora para vos podermos receber, listamos alguns itens ilustrativos do que iremos comprar.
+              </p>
+            </Reveal>
+
+            <Reveal delay={0.15}>
+              <p className="text-white/70 leading-relaxed mb-10 max-w-xl mx-auto">
+                Poderão contribuir com o valor que desejarem através dos nossos dados bancários.
+              </p>
+            </Reveal>
+
+            <Reveal delay={0.2}>
+              <div className="flex justify-center mb-14">
+                <div className="backdrop-blur-sm bg-white/[0.08] border border-white/[0.12] rounded-2xl px-8 py-5">
+                  <p className="text-white/90 font-medium text-sm md:text-base mb-3">Sofia Silva e José Francisco Pereira</p>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-white/40 text-[10px] tracking-[0.3em] uppercase">IBAN</p>
+                    <p className="text-white font-medium text-sm md:text-base tracking-wide">PT50 0033 0000 4583 1457 1540 5</p>
+                  </div>
+                  <div className="flex flex-col gap-1 mt-3">
+                    <p className="text-white/40 text-[10px] tracking-[0.3em] uppercase">BIC/SWIFT</p>
+                    <p className="text-white font-medium text-sm md:text-base tracking-wide">BCOMPTPL</p>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+
+          {/* Gift grid */}
+          <div className="max-w-5xl mx-auto mb-14">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {GIFTS.map((gift, i) => (
+                <Reveal key={gift.image} delay={Math.min(i * 0.04, 0.5)}>
+                  <div className="group h-full flex flex-col">
+                    <div className="relative aspect-square rounded-2xl overflow-hidden bg-white/95 shadow-sm border border-white/20">
+                      <img
+                        src={gift.image}
+                        alt={gift.name}
+                        loading="lazy"
+                        className={`w-full h-full object-contain p-3 md:p-4 transition-transform duration-500 ${
+                          gift.offered ? 'opacity-35 grayscale' : 'group-hover:scale-105'
+                        }`}
+                      />
+                      {gift.offered && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="bg-[#4A7A9B] text-white text-[10px] md:text-xs font-medium tracking-[0.2em] uppercase px-4 py-1.5 rounded-full shadow-md">
+                            Oferecido
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <p className={`text-[11px] md:text-xs leading-snug mt-3 px-1 text-center ${
+                      gift.offered ? 'text-white/45' : 'text-white/85'
+                    }`}>
+                      {gift.name}
+                    </p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+
+          <div className="max-w-3xl mx-auto text-center">
+            <Reveal delay={0.3}>
+              <div className="w-16 h-px bg-white/20 mx-auto mb-6" />
+              <p className="serif text-white/50 italic text-base md:text-lg">
+                Obrigado por fazerem parte deste momento tão especial! 🌟
+              </p>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+
+      {/* ───── ALOJAMENTO ───── */}
       <section className="py-24 md:py-32 px-6 bg-white/50">
         <div className="max-w-5xl mx-auto">
           <SectionHeading>Alojamento</SectionHeading>
@@ -1043,90 +1139,6 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
                 </a>
               </Reveal>
             ))}
-          </div>
-        </div>
-      </section>
-
-
-      {/* ───── GIFTS ───── */}
-      <section id="presentes" className="relative py-24 md:py-32 px-6 bg-gradient-to-b from-[#5D8AA8] to-[#4A7A9B] overflow-hidden">
-        {/* Decorative background elements */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-white/[0.03] blur-3xl" />
-          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-white/[0.02] blur-2xl" />
-        </div>
-
-        <div className="relative">
-          <div className="max-w-3xl mx-auto text-center">
-            <Reveal>
-              <Gift size={32} className="text-white/30 mx-auto mb-6" />
-            </Reveal>
-            <SectionHeading light>Lista de Presentes</SectionHeading>
-
-            <Reveal>
-              <p className="serif text-white/90 text-lg md:text-xl leading-relaxed mb-4 max-w-xl mx-auto">
-                A vossa presença no nosso dia é o que mais desejamos e nos deixa mais felizes.
-              </p>
-            </Reveal>
-            <Reveal delay={0.1}>
-              <p className="text-white/70 leading-relaxed mb-10 max-w-xl mx-auto">
-                Estamos a preparar a nossa primeira casa, caso queiram ajudar-nos a torná-la mais acolhedora para vos podermos receber, listamos alguns itens ilustrativos do que iremos comprar.
-              </p>
-            </Reveal>
-
-            <Reveal delay={0.15}>
-              <p className="text-white/70 leading-relaxed mb-10 max-w-xl mx-auto">
-                Poderão contribuir com o valor que desejarem através dos nossos dados bancários.
-              </p>
-            </Reveal>
-
-            <Reveal delay={0.2}>
-              <div className="flex justify-center mb-14">
-                <div className="backdrop-blur-sm bg-white/[0.08] border border-white/[0.12] rounded-2xl px-8 py-5">
-                  <p className="text-white/90 font-medium text-sm md:text-base mb-3">Sofia Silva e José Francisco Pereira</p>
-                  <div className="flex flex-col gap-1">
-                    <p className="text-white/40 text-[10px] tracking-[0.3em] uppercase">IBAN</p>
-                    <p className="text-white font-medium text-sm md:text-base tracking-wide">PT50 0033 0000 4583 1457 1540 5</p>
-                  </div>
-                  <div className="flex flex-col gap-1 mt-3">
-                    <p className="text-white/40 text-[10px] tracking-[0.3em] uppercase">BIC/SWIFT</p>
-                    <p className="text-white font-medium text-sm md:text-base tracking-wide">BCOMPTPL</p>
-                  </div>
-                </div>
-              </div>
-            </Reveal>
-          </div>
-
-          {/* Gift grid */}
-          <div className="max-w-5xl mx-auto mb-14">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {GIFTS.map((gift, i) => (
-                <Reveal key={gift.image} delay={Math.min(i * 0.04, 0.5)}>
-                  <div className="group h-full flex flex-col">
-                    <div className="aspect-square rounded-2xl overflow-hidden bg-white/95 shadow-sm border border-white/20">
-                      <img
-                        src={gift.image}
-                        alt={gift.name}
-                        loading="lazy"
-                        className="w-full h-full object-contain p-3 md:p-4 group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-                    <p className="text-white/85 text-[11px] md:text-xs leading-snug mt-3 px-1 text-center">
-                      {gift.name}
-                    </p>
-                  </div>
-                </Reveal>
-              ))}
-            </div>
-          </div>
-
-          <div className="max-w-3xl mx-auto text-center">
-            <Reveal delay={0.3}>
-              <div className="w-16 h-px bg-white/20 mx-auto mb-6" />
-              <p className="serif text-white/50 italic text-base md:text-lg">
-                Obrigado por fazerem parte deste momento tão especial! 🌟
-              </p>
-            </Reveal>
           </div>
         </div>
       </section>
