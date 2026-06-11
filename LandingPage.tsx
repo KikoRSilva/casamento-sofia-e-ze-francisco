@@ -915,7 +915,7 @@ const LandingPage: React.FC<{ skipIntro?: boolean }> = ({ skipIntro = false }) =
             </p>
             <p className="text-stone-500 text-sm mt-4 mb-5">Rota alternativa sugerida:</p>
             <a
-              href="https://www.google.com/maps/dir/?api=1&destination=Quinta+da+Sardinha+Marinhais&travelmode=driving"
+              href="https://www.google.com/maps/search/?api=1&query=39.0485206,-8.7195753"
               target="_blank"
               rel="noopener noreferrer"
               className="group inline-block"
