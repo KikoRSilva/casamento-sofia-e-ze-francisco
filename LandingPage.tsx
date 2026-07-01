@@ -39,7 +39,7 @@ const GIFTS: { name: string; image: string; offered?: boolean }[] = [
   { name: 'Cómoda de Carvalho com 9 gavetas', image: '/gifts/gift-19.png' },
   { name: 'Sofá Modular para Jardim', image: '/gifts/gift-20.png' },
   { name: 'Conjunto Costa Nova 12 Peças (Prato Grande, Sopa e Sobremesa)', image: '/gifts/gift-21.png' },
-  { name: 'Conjunto Costa Nova: Fruteira, Jarro e Prato para Bolos', image: '/gifts/gift-22.png' },
+  { name: 'Conjunto Costa Nova: Fruteira, Jarro e Prato para Bolos', image: '/gifts/gift-22.png', offered: true },
   { name: 'Conjunto Costa Nova: 12 Chávenas e Pires de Café, Açucareiro e Bule', image: '/gifts/gift-23.png' },
   { name: 'Conjunto Costa Nova: Set de Travessas Oval', image: '/gifts/gift-24.png' },
   { name: 'Conjunto Costa Nova: Set de Assadeiras Retangulares', image: '/gifts/gift-25.png' },
